@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OP TCG South Africa - Price Comparison & Strategy Suite</title>
+  <title>OP TCG South Africa - Price & Portfolio Suite</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -23,7 +23,7 @@
         <div class="bg-amber-500 text-gray-950 font-black p-2 rounded-xl text-xl tracking-wider">OP</div>
         <div>
           <h1 class="text-xl font-bold tracking-wide text-white">OP TCG South Africa</h1>
-          <p class="text-xs text-gray-400">Price Comparison & Strategy Suite</p>
+          <p class="text-xs text-gray-400">Marketplace, Analytics & Inventory Manager</p>
         </div>
       </div>
 
@@ -35,7 +35,7 @@
         </div>
 
         <button onclick="renderDashboard()" class="bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs px-3 py-1.5 rounded-lg transition">
-          <i class="fa-solid fa-sync mr-1"></i> Refresh UI
+          <i class="fa-solid fa-sync mr-1"></i> Refresh
         </button>
       </div>
     </div>
@@ -53,15 +53,15 @@
       <div class="glass-panel rounded-xl p-4">
         <p class="text-xs text-gray-400 font-medium">Lowest SA Market Total</p>
         <h3 id="stat-sa-lowest-total" class="text-2xl font-bold text-emerald-400 mt-1">--</h3>
-        <p class="text-[11px] text-gray-400 mt-1">Average Savings Across SA</p>
+        <p class="text-[11px] text-gray-400 mt-1">Best Buy Prices Combined</p>
       </div>
       <div class="glass-panel rounded-xl p-4">
         <p class="text-xs text-gray-400 font-medium">Global Benchmark (ZAR)</p>
         <h3 id="stat-global-zar-total" class="text-2xl font-bold text-blue-400 mt-1">--</h3>
-        <p class="text-[11px] text-gray-400 mt-1">Land Cost Benchmark</p>
+        <p class="text-[11px] text-gray-400 mt-1">Landed Import Benchmark</p>
       </div>
       <div class="glass-panel rounded-xl p-4">
-        <p class="text-xs text-gray-400 font-medium">Active SA Retailers</p>
+        <p class="text-xs text-gray-400 font-medium">Active SA Shops Tracked</p>
         <h3 class="text-2xl font-bold text-amber-400 mt-1">9 Stores</h3>
         <p class="text-[11px] text-gray-400 mt-1">Solarpop, LevelUp, BigBang +</p>
       </div>
@@ -78,12 +78,18 @@
       <button onclick="switchTab('radar')" id="tab-radar" class="bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold px-4 py-2 rounded-lg text-sm transition">
         <i class="fa-solid fa-calendar-days mr-2"></i>Release Radar
       </button>
+      <button onclick="switchTab('calc')" id="tab-calc" class="bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold px-4 py-2 rounded-lg text-sm transition">
+        <i class="fa-solid fa-calculator mr-2"></i>Import Calculator
+      </button>
+      <button onclick="switchTab('inventory')" id="tab-inventory" class="bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold px-4 py-2 rounded-lg text-sm transition">
+        <i class="fa-solid fa-warehouse mr-2"></i>My Inventory
+      </button>
     </div>
 
-    <!-- MAIN CATALOG TABLE CONTAINER -->
+    <!-- TAB 1 & 2: MAIN CATALOG TABLE CONTAINER -->
     <div id="view-catalog" class="glass-panel rounded-2xl p-6">
       <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
-        <input type="text" id="search-input" onkeyup="renderDashboard()" placeholder="Search products..." class="bg-gray-900 border border-gray-800 rounded-lg px-4 py-2 text-sm text-white w-full sm:w-80 focus:outline-none focus:border-amber-500">
+        <input type="text" id="search-input" onkeyup="renderDashboard()" placeholder="Search products or sets..." class="bg-gray-900 border border-gray-800 rounded-lg px-4 py-2 text-sm text-white w-full sm:w-80 focus:outline-none focus:border-amber-500">
         <span class="text-xs text-gray-400" id="last-updated-text"><i class="fa-solid fa-circle text-emerald-500 text-[8px] mr-1"></i> Live Market Active</span>
       </div>
 
@@ -96,6 +102,7 @@
               <th class="p-3 text-emerald-400">SA Lowest</th>
               <th class="p-3">SA Average</th>
               <th class="p-3 text-red-400">SA Highest</th>
+              <th class="p-3">Shops Listed</th>
               <th class="p-3">Global (USD)</th>
               <th class="p-3 text-blue-400">Global (ZAR)</th>
             </tr>
@@ -106,7 +113,7 @@
       </div>
     </div>
 
-    <!-- RELEASE RADAR VIEW (HIDDEN BY DEFAULT) -->
+    <!-- TAB 3: RELEASE RADAR VIEW -->
     <div id="view-radar" class="glass-panel rounded-2xl p-6 hidden">
       <h3 class="text-lg font-bold text-white mb-4"><i class="fa-solid fa-calendar-days text-amber-500 mr-2"></i>Upcoming SA One Piece Releases</h3>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -118,12 +125,71 @@
         </div>
         <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
           <span class="text-xs text-amber-400 font-mono font-bold">EB-01</span>
-          <h4 class="text-md font-bold text-white mt-1">Extra Booster Memorial Collection</h4>
+          <h4 class="text-md font-bold text-white mt-1">Memorial Collection Extra Booster</h4>
           <p class="text-xs text-gray-400 mt-1">In Stock Across SA</p>
           <p class="text-xs text-emerald-400 mt-2 font-semibold">SA Avg: R 2,200</p>
         </div>
       </div>
     </div>
+
+    <!-- TAB 4: IMPORT & MARGIN CALCULATOR -->
+    <div id="view-calc" class="glass-panel rounded-2xl p-6 hidden">
+      <h3 class="text-lg font-bold text-white mb-4"><i class="fa-solid fa-calculator text-amber-500 mr-2"></i>Import Landed Cost & Margin Calculator</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs text-gray-400 mb-1">Item Purchase Price (USD)</label>
+            <input type="number" id="calc-usd" value="100" oninput="calculateImport()" class="w-full bg-gray-900 border border-gray-800 rounded-lg p-2.5 text-white text-sm">
+          </div>
+          <div>
+            <label class="block text-xs text-gray-400 mb-1">Customs Duty & Import Tax (%)</label>
+            <input type="number" id="calc-tax" value="15" oninput="calculateImport()" class="w-full bg-gray-900 border border-gray-800 rounded-lg p-2.5 text-white text-sm">
+          </div>
+          <div>
+            <label class="block text-xs text-gray-400 mb-1">Shipping Cost (ZAR)</label>
+            <input type="number" id="calc-shipping" value="350" oninput="calculateImport()" class="w-full bg-gray-900 border border-gray-800 rounded-lg p-2.5 text-white text-sm">
+          </div>
+        </div>
+
+        <div class="bg-gray-900/80 p-5 rounded-xl border border-gray-800 flex flex-col justify-between">
+          <div>
+            <p class="text-xs text-gray-400">Total Landed Cost in South Africa</p>
+            <h2 id="calc-result" class="text-3xl font-black text-amber-400 mt-1">R 0.00</h2>
+            <p class="text-xs text-gray-500 mt-2">Calculated using live Exchange Rate (<span id="calc-rate-ref">--</span>) + Selected Duty & Freight.</p>
+          </div>
+          <div class="pt-4 border-t border-gray-800">
+            <p class="text-xs text-emerald-400 font-semibold"><i class="fa-solid fa-shield-halved mr-1"></i> Strategy Note:</p>
+            <p class="text-xs text-gray-400 mt-1">Compare this landed total against local retail (Solarpop / LevelUp / BigBang) to find arbitrage margins.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: PERSONAL INVENTORY / PORTFOLIO -->
+    <div id="view-inventory" class="glass-panel rounded-2xl p-6 hidden">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-warehouse text-amber-500 mr-2"></i>My Collection & Investment Portfolio</h3>
+        <button onclick="addInventoryItem()" class="bg-amber-500 text-gray-950 font-bold px-3 py-1.5 rounded-lg text-xs hover:bg-amber-400 transition">+ Add Item</button>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm text-gray-300">
+          <thead class="bg-gray-900/80 text-xs text-gray-400 uppercase border-b border-gray-800">
+            <tr>
+              <th class="p-3">Item</th>
+              <th class="p-3">Qty</th>
+              <th class="p-3">Buy Price (ZAR)</th>
+              <th class="p-3 text-emerald-400">Current SA Value</th>
+              <th class="p-3">Profit/Loss</th>
+            </tr>
+          </thead>
+          <tbody id="inventory-table-body" class="divide-y divide-gray-800/50">
+            <!-- Rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
   </main>
 
   <script>
@@ -131,7 +197,11 @@
     const IMPORT_FACTOR = 1.15;
     let currentTab = 'sealed';
 
-    // Master Catalog Data (Sealed & Singles)
+    let myInventory = [
+      { name: "Romance Dawn Booster Box (OP-01)", qty: 2, buyPrice: 3500 },
+      { name: "Shanks (Manga Alternate Art)", qty: 1, buyPrice: 20000 }
+    ];
+
     let masterCatalog = [
       { id: "OP01-BOX", name: "Romance Dawn Booster Box (OP-01)", category: "sealed", set: "OP-01", globalUsd: 220.00, stores: { Solarpop: 3800, LevelUp: 3950, BigBang: 4100, Mirage: 3900 } },
       { id: "OP02-BOX", name: "Paramount War Booster Box (OP-02)", category: "sealed", set: "OP-02", globalUsd: 145.00, stores: { Solarpop: 2800, LevelUp: 3100, BigBang: 3400, Mirage: 3000 } },
@@ -157,6 +227,7 @@
         if (data && data.rates && data.rates.ZAR) {
           usdToZarRate = data.rates.ZAR;
           document.getElementById('usd-zar-display').innerText = `R ${usdToZarRate.toFixed(2)}`;
+          calculateImport();
           renderDashboard();
         }
       } catch (e) {
@@ -179,18 +250,79 @@
 
     function switchTab(tab) {
       currentTab = tab;
-      document.getElementById('tab-sealed').className = tab === 'sealed' ? 'bg-amber-500 text-gray-950 font-bold px-4 py-2 rounded-lg text-sm transition' : 'bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold px-4 py-2 rounded-lg text-sm transition';
-      document.getElementById('tab-singles').className = tab === 'singles' ? 'bg-amber-500 text-gray-950 font-bold px-4 py-2 rounded-lg text-sm transition' : 'bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold px-4 py-2 rounded-lg text-sm transition';
-      document.getElementById('tab-radar').className = tab === 'radar' ? 'bg-amber-500 text-gray-950 font-bold px-4 py-2 rounded-lg text-sm transition' : 'bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold px-4 py-2 rounded-lg text-sm transition';
+      const tabs = ['sealed', 'singles', 'radar', 'calc', 'inventory'];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`tab-${t}`);
+        if (btn) {
+          btn.className = t === tab ? 'bg-amber-500 text-gray-950 font-bold px-4 py-2 rounded-lg text-sm transition' : 'bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold px-4 py-2 rounded-lg text-sm transition';
+        }
+      });
 
-      if (tab === 'radar') {
-        document.getElementById('view-catalog').classList.add('hidden');
-        document.getElementById('view-radar').classList.remove('hidden');
-      } else {
-        document.getElementById('view-radar').classList.add('hidden');
+      document.getElementById('view-catalog').classList.add('hidden');
+      document.getElementById('view-radar').classList.add('hidden');
+      document.getElementById('view-calc').classList.add('hidden');
+      document.getElementById('view-inventory').classList.add('hidden');
+
+      if (tab === 'sealed' || tab === 'singles') {
         document.getElementById('view-catalog').classList.remove('hidden');
         renderDashboard();
+      } else if (tab === 'radar') {
+        document.getElementById('view-radar').classList.remove('hidden');
+      } else if (tab === 'calc') {
+        document.getElementById('view-calc').classList.remove('hidden');
+        calculateImport();
+      } else if (tab === 'inventory') {
+        document.getElementById('view-inventory').classList.remove('hidden');
+        renderInventory();
       }
+    }
+
+    function calculateImport() {
+      const usd = parseFloat(document.getElementById('calc-usd').value) || 0;
+      const taxPercent = parseFloat(document.getElementById('calc-tax').value) || 0;
+      const shipping = parseFloat(document.getElementById('calc-shipping').value) || 0;
+
+      const baseZar = usd * usdToZarRate;
+      const totalLanded = (baseZar * (1 + (taxPercent / 100))) + shipping;
+
+      document.getElementById('calc-rate-ref').innerText = `R ${usdToZarRate.toFixed(2)}/USD`;
+      document.getElementById('calc-result').innerText = `R ${totalLanded.toLocaleString('en-ZA', {maximumFractionDigits: 2})}`;
+    }
+
+    function renderInventory() {
+      const tbody = document.getElementById('inventory-table-body');
+      tbody.innerHTML = '';
+      myInventory.forEach(item => {
+        const matched = masterCatalog.find(c => c.name === item.name);
+        let currentVal = item.buyPrice;
+        if (matched) {
+          const prices = Object.values(matched.stores || {}).filter(p => p > 0);
+          if (prices.length) currentVal = Math.min(...prices);
+        }
+
+        const profit = (currentVal - item.buyPrice) * item.qty;
+        const profitClass = profit >= 0 ? 'text-emerald-400' : 'text-red-400';
+
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-gray-800/30 transition";
+        tr.innerHTML = `
+          <td class="p-3 font-semibold text-white">${item.name}</td>
+          <td class="p-3">${item.qty}</td>
+          <td class="p-3">R ${item.buyPrice.toLocaleString('en-ZA')}</td>
+          <td class="p-3 text-emerald-400 font-bold">R ${currentVal.toLocaleString('en-ZA')}</td>
+          <td class="p-3 font-bold ${profitClass}">R ${profit >= 0 ? '+' : ''}${profit.toLocaleString('en-ZA')}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function addInventoryItem() {
+      const name = prompt("Enter item name (e.g., OP-05 Booster Box):");
+      if (!name) return;
+      const qty = parseInt(prompt("Enter quantity:", "1")) || 1;
+      const buyPrice = parseFloat(prompt("Enter buy price per unit (ZAR):", "2500")) || 0;
+      myInventory.push({ name, qty, buyPrice });
+      renderInventory();
     }
 
     function renderDashboard() {
@@ -208,7 +340,8 @@
       let totalGlobalZar = 0;
 
       filtered.forEach(item => {
-        const prices = Object.values(item.stores || {}).filter(p => p > 0);
+        const storeEntries = Object.entries(item.stores || {});
+        const prices = storeEntries.map(e => e[1]).filter(p => p > 0);
         const saLowest = prices.length ? Math.min(...prices) : (item.globalUsd * usdToZarRate * IMPORT_FACTOR);
         const saHighest = prices.length ? Math.max(...prices) : (item.globalUsd * usdToZarRate * IMPORT_FACTOR);
         const saAvg = prices.length ? (prices.reduce((a,b)=>a+b,0)/prices.length) : saLowest;
@@ -216,6 +349,8 @@
 
         totalSaLowest += saLowest;
         totalGlobalZar += globalZar;
+
+        const shopListings = storeEntries.map(([store, price]) => `<span class="bg-gray-800 px-1.5 py-0.5 rounded text-[11px] mr-1 text-gray-300">${store}: R${price}</span>`).join('');
 
         const tr = document.createElement('tr');
         tr.className = "hover:bg-gray-800/30 transition";
@@ -225,6 +360,7 @@
           <td class="p-3 font-bold text-emerald-400">R ${saLowest.toLocaleString('en-ZA', {maximumFractionDigits: 0})}</td>
           <td class="p-3 text-gray-300">R ${saAvg.toLocaleString('en-ZA', {maximumFractionDigits: 0})}</td>
           <td class="p-3 text-red-400">R ${saHighest.toLocaleString('en-ZA', {maximumFractionDigits: 0})}</td>
+          <td class="p-3">${shopListings || '<span class="text-xs text-gray-500">N/A</span>'}</td>
           <td class="p-3 text-gray-400">$${item.globalUsd.toFixed(2)}</td>
           <td class="p-3 text-blue-400 font-semibold">R ${globalZar.toLocaleString('en-ZA', {maximumFractionDigits: 2})}</td>
         `;
