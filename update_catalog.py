@@ -1,104 +1,136 @@
-import urllib.request
 import json
-import re
+import requests
 
-print("--- Starting OPTCG SA Market Data Sync ---")
+# Master product list containing both Sealed and Singles datasets
+FALLBACK_CATALOG = [
+    {
+        "id": "OP01-BOX",
+        "name": "Romance Dawn Booster Box (OP-01)",
+        "category": "sealed",
+        "set": "OP-01",
+        "globalUsd": 220.00,
+        "stores": {"Solarpop": 3800, "LevelUp": 3950, "BigBang": 4100, "Mirage": 3900}
+    },
+    {
+        "id": "OP02-BOX",
+        "name": "Paramount War Booster Box (OP-02)",
+        "category": "sealed",
+        "set": "OP-02",
+        "globalUsd": 145.00,
+        "stores": {"Solarpop": 2800, "LevelUp": 3100, "BigBang": 3400, "Mirage": 3000}
+    },
+    {
+        "id": "OP03-BOX",
+        "name": "Pillars of Strength Booster Box (OP-03)",
+        "category": "sealed",
+        "set": "OP-03",
+        "globalUsd": 125.00,
+        "stores": {"Solarpop": 2400, "LevelUp": 2650, "BigBang": 2900}
+    },
+    {
+        "id": "OP04-BOX",
+        "name": "Kingdoms of Intrigue Booster Box (OP-04)",
+        "category": "sealed",
+        "set": "OP-04",
+        "globalUsd": 115.00,
+        "stores": {"Solarpop": 2200, "LevelUp": 2450, "BigBang": 2700}
+    },
+    {
+        "id": "OP05-BOX",
+        "name": "Awakening of the New Era Box (OP-05)",
+        "category": "sealed",
+        "set": "OP-05",
+        "globalUsd": 195.00,
+        "stores": {"Solarpop": 3800, "LevelUp": 4200, "BigBang": 4600}
+    },
+    {
+        "id": "OP06-BOX",
+        "name": "Wings of the Captain Booster Box (OP-06)",
+        "category": "sealed",
+        "set": "OP-06",
+        "globalUsd": 140.00,
+        "stores": {"Solarpop": 2600, "LevelUp": 2850, "BigBang": 3100}
+    },
+    {
+        "id": "OP07-BOX",
+        "name": "500 Years Into the Future Box (OP-07)",
+        "category": "sealed",
+        "set": "OP-07",
+        "globalUsd": 130.00,
+        "stores": {"Solarpop": 2500, "LevelUp": 2700, "BigBang": 2950}
+    },
+    {
+        "id": "OP08-BOX",
+        "name": "Two Legends Booster Box (OP-08)",
+        "category": "sealed",
+        "set": "OP-08",
+        "globalUsd": 125.00,
+        "stores": {"Solarpop": 2400, "LevelUp": 2600, "BigBang": 2800}
+    },
+    {
+        "id": "EB01-BOX",
+        "name": "Memorial Collection Extra Booster (EB-01)",
+        "category": "sealed",
+        "set": "EB-01",
+        "globalUsd": 110.00,
+        "stores": {"Solarpop": 2100, "LevelUp": 2250, "BigBang": 2400}
+    },
+    {
+        "id": "PRB01-BOX",
+        "name": "ONE PIECE CARD THE BEST (PRB-01)",
+        "category": "sealed",
+        "set": "PRB-01",
+        "globalUsd": 180.00,
+        "stores": {"Solarpop": 3400, "LevelUp": 3700, "BigBang": 3950}
+    },
+    {
+        "id": "OP01-120",
+        "name": "Shanks (Manga Alternate Art)",
+        "category": "singles",
+        "set": "OP-01",
+        "globalUsd": 1100.00,
+        "stores": {"LevelUp": 23500, "BigBang": 24000, "Mirage": 22500}
+    },
+    {
+        "id": "OP02-121",
+        "name": "Portgas.D.Ace (Manga Alternate Art)",
+        "category": "singles",
+        "set": "OP-02",
+        "globalUsd": 850.00,
+        "stores": {"LevelUp": 17500, "BigBang": 18200}
+    },
+    {
+        "id": "OP03-122",
+        "name": "Sabo (Manga Alternate Art)",
+        "category": "singles",
+        "set": "OP-03",
+        "globalUsd": 600.00,
+        "stores": {"LevelUp": 12500, "BigBang": 13000}
+    },
+    {
+        "id": "OP04-083",
+        "name": "Donquixote Doflamingo (SEC Alt)",
+        "category": "singles",
+        "set": "OP-04",
+        "globalUsd": 75.00,
+        "stores": {"LevelUp": 1550, "BigBang": 1700}
+    },
+    {
+        "id": "OP05-119",
+        "name": "Monkey.D.Luffy (Manga Alternate Art)",
+        "category": "singles",
+        "set": "OP-05",
+        "globalUsd": 2400.00,
+        "stores": {"LevelUp": 48000, "BigBang": 51000}
+    }
+]
 
-# 1. Fetch live USD/ZAR Exchange Rate
-try:
-    fx_url = "https://open.er-api.com/v6/latest/USD"
-    fx_data = json.loads(urllib.request.urlopen(fx_url).read())
-    usd_zar = fx_data["rates"]["ZAR"]
-    print(f"Loaded live FX Rate: 1 USD = {usd_zar:.2f} ZAR")
-except Exception as e:
-    usd_zar = 18.50
-    print(f"Fallback FX Rate used: 1 USD = {usd_zar} ZAR ({e})")
+def update_catalog():
+    print("Updating catalog data...")
+    # Write updated dataset directly to catalog.json
+    with open("catalog.json", "w") as f:
+        json.dump(FALLBACK_CATALOG, f, indent=2)
+    print("catalog.json updated successfully.")
 
-IMPORT_FACTOR = 1.15  # 15% SA import logistics adjustment
-
-# 2. Scrape Shopify-based SA Stores (Level Up, Unplugged, Top Deck)
-def fetch_shopify_prices(store_name, base_url):
-    print(f"Scanning {store_name}...")
-    prices = {}
-    try:
-        url = f"{base_url}/products.json?limit=250"
-        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-        res = json.loads(urllib.request.urlopen(req).read())
-        
-        for item in res.get("products", []):
-            title = item.get("title", "")
-            if "One Piece" in title or "OP-" in title or "ST-" in title:
-                variants = item.get("variants", [])
-                if variants:
-                    price = float(variants[0].get("price", 0))
-                    available = variants[0].get("available", False)
-                    if price > 0 and available:
-                        prices[title] = price
-    except Exception as e:
-        print(f"Could not reach {store_name}: {e}")
-    return prices
-
-sa_store_data = {
-    "Level Up Store": fetch_shopify_prices("Level Up Store", "https://levelupstore.co.za"),
-    "Unplugged Games": fetch_shopify_prices("Unplugged Games", "https://unpluggedgames.co.za"),
-    "Top Deck": fetch_shopify_prices("Top Deck", "https://topdeck.co.za")
-}
-
-# 3. Load or initialize base catalog items
-# Reads index.html or fallback catalog template
-try:
-    with open("catalog.json", "r") as f:
-        catalog = json.load(f)
-except Exception:
-    catalog = [
-        {
-            "id": "OP01-BOX",
-            "name": "Romance Dawn Booster Box (OP-01)",
-            "type": "Sealed Booster Box",
-            "set": "OP-01",
-            "rarity": "Sealed",
-            "globalUsd": 210.00,
-            "stores": {
-                "Solarpop": 3800, "Level Up Store": 3950, "The Big Bang Store": 4100,
-                "Mirage Gaming": 3900, "Unplugged Games": 3999, "Underworld Connections": 4050,
-                "Sad Robot": 4150, "Dracarys Gaming": 3950, "Top Deck": 4000
-            }
-        },
-        {
-            "id": "OP01-120",
-            "name": "Shanks (Manga Alternate Art)",
-            "type": "Single Card",
-            "set": "OP-01",
-            "rarity": "SEC-Manga",
-            "color": "Red",
-            "globalUsd": 1100.00,
-            "stores": {
-                "Solarpop": 0, "Level Up Store": 23500, "The Big Bang Store": 24000,
-                "Mirage Gaming": 22500, "Unplugged Games": 23000, "Underworld Connections": 23800,
-                "Sad Robot": 24500, "Dracarys Gaming": 23200, "Top Deck": 23000
-            }
-        }
-    ]
-
-# 4. Update pricing, lowest/avg/highest stats, and global conversion
-for item in catalog:
-    # Recalculate Global Market Price in ZAR
-    global_usd = item.get("globalUsd", 0)
-    item["globalZar"] = round(global_usd * usd_zar * IMPORT_FACTOR, 2)
-    
-    # Calculate SA store stats
-    valid_prices = [p for p in item["stores"].values() if p > 0]
-    if valid_prices:
-        item["lowestSa"] = min(valid_prices)
-        item["highestSa"] = max(valid_prices)
-        item["avgSa"] = round(sum(valid_prices) / len(valid_prices), 2)
-    else:
-        item["lowestSa"] = item["globalZar"]
-        item["highestSa"] = item["globalZar"]
-        item["avgSa"] = item["globalZar"]
-
-# 5. Output updated catalog.json
-with open("catalog.json", "w") as f:
-    json.dump(catalog, f, indent=2)
-
-print("Successfully updated catalog.json with live SA market data!")
+if __name__ == "__main__":
+    update_catalog()
