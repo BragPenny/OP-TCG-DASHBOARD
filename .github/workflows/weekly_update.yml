@@ -1,9 +1,10 @@
-name: Weekly OPTCG SA Market Data Update
+name: OPTCG SA Market Data Update
 
 on:
   schedule:
-    - cron: '0 0 * * 0' # Runs automatically every Sunday at 00:00 UTC
-  workflow_dispatch: # Allows manual triggering anytime
+    - cron: '0 */6 * * *'   # every 6 hours - tighter while new stock is landing this week
+    # Once things settle down, you can loosen this back up, e.g. '0 0 * * *' for once a day.
+  workflow_dispatch: {}      # lets you trigger it manually from the Actions tab any time
 
 jobs:
   update-catalog:
@@ -19,6 +20,9 @@ jobs:
         with:
           python-version: '3.10'
 
+      - name: Install dependencies
+        run: pip install requests
+
       - name: Run Market Data Update Script
         run: python update_catalog.py
 
@@ -27,4 +31,4 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add catalog.json
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Automated Weekly OPTCG SA Catalog Update" && git push)
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Automated OPTCG SA catalog update" && git push)
