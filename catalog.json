@@ -1,0 +1,49 @@
+[
+  {
+    "id": "OP01-BOX",
+    "name": "Romance Dawn Booster Box (OP-01)",
+    "type": "Sealed Booster Box",
+    "set": "OP-01",
+    "rarity": "Sealed",
+    "globalUsd": 210.0,
+    "stores": {
+      "Solarpop": 3800,
+      "Level Up Store": 3950,
+      "The Big Bang Store": 4100,
+      "Mirage Gaming": 3900,
+      "Unplugged Games": 3999,
+      "Underworld Connections": 4050,
+      "Sad Robot": 4150,
+      "Dracarys Gaming": 3950,
+      "Top Deck": 4000
+    },
+    "globalZar": 3937.58,
+    "lowestSa": 3800,
+    "highestSa": 4150,
+    "avgSa": 3988.78
+  },
+  {
+    "id": "OP01-120",
+    "name": "Shanks (Manga Alternate Art)",
+    "type": "Single Card",
+    "set": "OP-01",
+    "rarity": "SEC-Manga",
+    "color": "Red",
+    "globalUsd": 1100.0,
+    "stores": {
+      "Solarpop": 0,
+      "Level Up Store": 23500,
+      "The Big Bang Store": 24000,
+      "Mirage Gaming": 22500,
+      "Unplugged Games": 23000,
+      "Underworld Connections": 23800,
+      "Sad Robot": 24500,
+      "Dracarys Gaming": 23200,
+      "Top Deck": 23000
+    },
+    "globalZar": 20625.44,
+    "lowestSa": 22500,
+    "highestSa": 24500,
+    "avgSa": 23437.5
+  }
+]
