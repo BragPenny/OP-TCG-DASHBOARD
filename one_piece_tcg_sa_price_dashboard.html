@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>One Piece TCG South Africa - Price Comparison & Strategy Suite</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        ocean: {
+                            900: '#0a0e17',
+                            800: '#111827',
+                            700: '#1f293d',
+                            600: '#2d3b55'
+                        },
+                        gold: {
+                            400: '#fbbf24',
+                            500: '#f59e0b',
+                            600: '#d97706'
+                        },
+                        crimson: {
+                            500: '#ef4444',
+                            600: '#dc2626'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Chart.js for Market Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0a0e17; }
+        ::-webkit-scrollbar-thumb { background: #2d3b55; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #f59e0b; }
+    </style>
+</head>
+<body class="bg-ocean-900 text-gray-100 min-h-screen flex flex-col">
+
+    <!-- Top Header -->
+    <header class="bg-ocean-800 border-b border-ocean-600 sticky top-0 z-30 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <!-- Brand -->
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-gold-500 to-amber-700 flex items-center justify-center text-ocean-900 font-extrabold text-xl shadow-md">
+                    OP
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold text-gray-100 leading-tight">OP TCG South Africa</h1>
+                    <p class="text-xs text-gold-400 font-medium">Price Comparison & Strategy Suite</p>
+                </div>
+            </div>
+
+            <!-- Currency & Global Controls -->
+            <div class="flex items-center gap-4">
+                <div class="hidden md:flex items-center bg-ocean-900 px-3 py-1.5 rounded-lg border border-ocean-600 text-xs">
+                    <span class="text-gray-400 mr-2"><i class="fa-solid font-bold fa-dollar-sign"></i> USD/ZAR Rate:</span>
+                    <span class="font-semibold text-gold-400 mr-1">R</span>
+                    <input type="number" id="usdZarInput" value="18.50" step="0.10" class="w-16 bg-ocean-800 border border-ocean-600 text-gold-400 font-bold px-1 py-0.5 rounded focus:outline-none focus:border-gold-500 text-center">
+                    <span class="text-gray-500 ml-2 text-[10px]" title="Includes 15% SA Logistics & Import Tariff Factor">(+15% Import)</span>
+                </div>
+
+                <button onclick="openProductModal()" class="bg-gold-500 hover:bg-gold-600 text-ocean-900 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5 transition shadow">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Add Item</span>
+                </button>
+
+                <button onclick="exportJSON()" class="bg-ocean-700 hover:bg-ocean-600 text-gray-200 px-2.5 py-1.5 rounded-lg text-xs border border-ocean-600 transition" title="Export Backup">
+                    <i class="fa-solid fa-download"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-6">
+
+        <!-- Summary Stats Banner -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="bg-ocean-800 border border-ocean-700 rounded-xl p-4 shadow-sm">
+                <div class="text-xs text-gray-400 font-medium mb-1">Total Catalog Items</div>
+                <div class="text-2xl font-extrabold text-white" id="statTotalItems">0</div>
+                <div class="text-[11px] text-gold-400 mt-1 flex items-center gap-1">
+                    <i class="fa-solid fa-boxes-stacked"></i> Sealed & Singles
+                </div>
+            </div>
+            <div class="bg-ocean-800 border border-ocean-700 rounded-xl p-4 shadow-sm">
+                <div class="text-xs text-gray-400 font-medium mb-1">Lowest SA Market Total</div>
+                <div class="text-2xl font-extrabold text-emerald-400" id="statLowestAvg">R0.00</div>
+                <div class="text-[11px] text-gray-400 mt-1">Average Savings Across SA</div>
+            </div>
+            <div class="bg-ocean-800 border border-ocean-700 rounded-xl p-4 shadow-sm">
+                <div class="text-xs text-gray-400 font-medium mb-1">Global Benchmark (ZAR)</div>
+                <div class="text-2xl font-extrabold text-blue-400" id="statGlobalAvg">R0.00</div>
+                <div class="text-[11px] text-gray-400 mt-1">Land Cost Benchmark</div>
+            </div>
+            <div class="bg-ocean-800 border border-ocean-700 rounded-xl p-4 shadow-sm">
+                <div class="text-xs text-gray-400 font-medium mb-1">Active SA Retailers</div>
+                <div class="text-2xl font-extrabold text-gold-400">9 Stores</div>
+                <div class="text-[11px] text-gray-400 mt-1">Solarpop, LevelUp, BigBang +</div>
+            </div>
+        </div>
+
+        <!-- NAVIGATION TABS -->
+        <div class="border-b border-ocean-700 flex flex-wrap gap-2 text-sm font-semibold">
+            <button onclick="switchTab('sealed')" id="tabBtn-sealed" class="tab-btn px-4 py-2.5 rounded-t-lg bg-ocean-800 text-gold-400 border-t-2 border-gold-500 flex items-center gap-2">
+                <i class="fa-solid fa-box-archive"></i> Sealed Sets
+            </button>
+            <button onclick="switchTab('singles')" id="tabBtn-singles" class="tab-btn px-4 py-2.5 rounded-t-lg bg-ocean-900 text-gray-400 border-t-2 border-transparent hover:text-gray-200 flex items-center gap-2">
+                <i class="fa-solid fa-clone"></i> Single Cards
+            </button>
+            <button onclick="switchTab('analytics')" id="tabBtn-analytics" class="tab-btn px-4 py-2.5 rounded-t-lg bg-ocean-900 text-gray-400 border-t-2 border-transparent hover:text-gray-200 flex items-center gap-2">
+                <i class="fa-solid fa-chart-line"></i> Market Analytics
+            </button>
+            <button onclick="switchTab('inventory')" id="tabBtn-inventory" class="tab-btn px-4 py-2.5 rounded-t-lg bg-ocean-900 text-gray-400 border-t-2 border-transparent hover:text-gray-200 flex items-center gap-2">
+                <i class="fa-solid fa-warehouse"></i> My Inventory
+            </button>
+            <button onclick="switchTab('releases')" id="tabBtn-releases" class="tab-btn px-4 py-2.5 rounded-t-lg bg-ocean-900 text-gray-400 border-t-2 border-transparent hover:text-gray-200 flex items-center gap-2">
+                <i class="fa-solid fa-calendar-days"></i> Release Radar
+            </button>
+        </div>
+
+        <!-- TAB 1: SEALED PRODUCTS CATALOG -->
+        <section id="tab-sealed" class="tab-content flex flex-col gap-4">
+            <div class="flex flex-wrap gap-3 justify-between items-center bg-ocean-800 p-3 rounded-xl border border-ocean-700">
+                <div class="flex-1 min-w-[240px]">
+                    <div class="relative">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                        <input type="text" id="sealedSearch" oninput="renderSealedTable()" placeholder="Search sealed products (e.g. OP-05, Romance Dawn)..." class="w-full bg-ocean-900 border border-ocean-600 pl-9 pr-3 py-1.5 rounded-lg text-xs text-gray-200 focus:outline-none focus:border-gold-500">
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs text-gray-400">Category Filter:</span>
+                    <select id="sealedTypeFilter" onchange="renderSealedTable()" class="bg-ocean-900 border border-ocean-600 text-xs text-gray-200 py-1.5 px-3 rounded-lg focus:outline-none focus:border-gold-500">
+                        <option value="ALL">All Sealed Products</option>
+                        <option value="Booster Box">Booster Boxes</option>
+                        <option value="Starter Deck">Starter Decks</option>
+                        <option value="Anniversary">Anniversary Sets</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Sealed Table -->
+            <div class="bg-ocean-800 rounded-xl border border-ocean-700 overflow-hidden shadow">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-gray-300">
+                        <thead class="bg-ocean-900 text-gray-400 font-semibold uppercase tracking-wider border-b border-ocean-700">
+                            <tr>
+                                <th class="p-3">Product Name</th>
+                                <th class="p-3">Set Code</th>
+                                <th class="p-3">SA Lowest</th>
+                                <th class="p-3">SA Average</th>
+                                <th class="p-3">SA Highest</th>
+                                <th class="p-3">Global Benchmark (USD)</th>
+                                <th class="p-3">Global (ZAR)</th>
+                                <th class="p-3 text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sealedTableBody" class="divide-y divide-ocean-700 font-medium">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: SINGLE CARDS CATALOG -->
+        <section id="tab-singles" class="tab-content hidden flex flex-col gap-4">
+            <!-- Filter Toolbar -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-3 bg-ocean-800 p-3 rounded-xl border border-ocean-700">
+                <div>
+                    <input type="text" id="singlesSearch" oninput="renderSinglesTable()" placeholder="Search single card name or ID..." class="w-full bg-ocean-900 border border-ocean-600 px-3 py-1.5 rounded-lg text-xs text-gray-200 focus:outline-none focus:border-gold-500">
+                </div>
+                <div>
+                    <select id="rarityFilter" onchange="renderSinglesTable()" class="w-full bg-ocean-900 border border-ocean-600 text-xs text-gray-200 py-1.5 px-3 rounded-lg focus:outline-none focus:border-gold-500">
+                        <option value="ALL">All Rarities</option>
+                        <option value="C">Common (C)</option>
+                        <option value="UC">Uncommon (UC)</option>
+                        <option value="R">Rare (R)</option>
+                        <option value="SR">Super Rare (SR)</option>
+                        <option value="SEC">Secret Rare (SEC)</option>
+                        <option value="Leader">Leader</option>
+                        <option value="Manga Rare">Manga Rare</option>
+                    </select>
+                </div>
+                <div>
+                    <select id="colorFilter" onchange="renderSinglesTable()" class="w-full bg-ocean-900 border border-ocean-600 text-xs text-gray-200 py-1.5 px-3 rounded-lg focus:outline-none focus:border-gold-500">
+                        <option value="ALL">All Colors</option>
+                        <option value="Red">Red</option>
+                        <option value="Green">Green</option>
+                        <option value="Blue">Blue</option>
+                        <option value="Purple">Purple</option>
+                        <option value="Black">Black</option>
+                        <option value="Yellow">Yellow</option>
+                    </select>
+                </div>
+                <div>
+                    <select id="setFilter" onchange="renderSinglesTable()" class="w-full bg-ocean-900 border border-ocean-600 text-xs text-gray-200 py-1.5 px-3 rounded-lg focus:outline-none focus:border-gold-500">
+                        <option value="ALL">All Sets</option>
+                        <option value="OP-01">OP-01 Romance Dawn</option>
+                        <option value="OP-02">OP-02 Paramount War</option>
+                        <option value="OP-05">OP-05 Awakening of Era</option>
+                        <option value="OP-06">OP-06 Wings of Captain</option>
+                        <option value="OP-07">OP-07 500 Years Future</option>
+                        <option value="OP-09">OP-09 Four Emperors</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Singles Table -->
+            <div class="bg-ocean-800 rounded-xl border border-ocean-700 overflow-hidden shadow">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-gray-300">
+                        <thead class="bg-ocean-900 text-gray-400 font-semibold uppercase tracking-wider border-b border-ocean-700">
+                            <tr>
+                                <th class="p-3">Card Name</th>
+                                <th class="p-3">Card ID</th>
+                                <th class="p-3">Rarity</th>
+                                <th class="p-3">Color</th>
+                                <th class="p-3">Lowest SA</th>
+                                <th class="p-3">SA Average</th>
+                                <th class="p-3">Global (USD)</th>
+                                <th class="p-3">Global (ZAR)</th>
+                                <th class="p-3 text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="singlesTableBody" class="divide-y divide-ocean-700 font-medium">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: MARKET ANALYTICS -->
+        <section id="tab-analytics" class="tab-content hidden flex flex-col gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Main Canvas Chart -->
+                <div class="lg:col-span-2 bg-ocean-800 p-5 rounded-xl border border-ocean-700 shadow flex flex-col gap-4">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-sm font-bold text-gray-200 flex items-center gap-2">
+                            <i class="fa-solid fa-chart-line text-gold-400"></i>
+                            30 / 60 / 90 Day Market Price Index Trend (SA Avg vs Global)
+                        </h2>
+                        <select id="analyticsItemSelect" onchange="updateAnalyticsChart()" class="bg-ocean-900 border border-ocean-600 text-xs text-gold-400 px-3 py-1 rounded-lg focus:outline-none">
+                            <!-- Options populated dynamically -->
+                        </select>
+                    </div>
+                    <div class="w-full h-72">
+                        <canvas id="marketChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Demand Matrix & Insights -->
+                <div class="bg-ocean-800 p-5 rounded-xl border border-ocean-700 shadow flex flex-col gap-4">
+                    <h3 class="text-sm font-bold text-gray-200 border-b border-ocean-700 pb-2">Top Hot Meta Demand Items</h3>
+                    <div class="space-y-3" id="demandList">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 4: SHOP INVENTORY TRACKER -->
+        <section id="tab-inventory" class="tab-content hidden flex flex-col gap-4">
+            <!-- Inventory Summary Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-ocean-800 border border-ocean-700 p-4 rounded-xl">
+                    <div class="text-xs text-gray-400">Total Stock Count</div>
+                    <div class="text-xl font-bold text-gray-100" id="invTotalCount">0 Units</div>
+                </div>
+                <div class="bg-ocean-800 border border-ocean-700 p-4 rounded-xl">
+                    <div class="text-xs text-gray-400">Total Landed Asset Value</div>
+                    <div class="text-xl font-bold text-amber-400" id="invTotalCost">R0.00</div>
+                </div>
+                <div class="bg-ocean-800 border border-ocean-700 p-4 rounded-xl">
+                    <div class="text-xs text-gray-400">Potential Retail Portfolio Revenue</div>
+                    <div class="text-xl font-bold text-emerald-400" id="invTotalValue">R0.00</div>
+                </div>
+            </div>
+
+            <!-- Inventory Table -->
+            <div class="bg-ocean-800 rounded-xl border border-ocean-700 overflow-hidden shadow">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-gray-300">
+                        <thead class="bg-ocean-900 text-gray-400 font-semibold uppercase border-b border-ocean-700">
+                            <tr>
+                                <th class="p-3">Product Name</th>
+                                <th class="p-3">Stock Count</th>
+                                <th class="p-3">Landed Cost (ZAR)</th>
+                                <th class="p-3">Selling Price (ZAR)</th>
+                                <th class="p-3">Unit Margin</th>
+                                <th class="p-3">Total Asset Value</th>
+                                <th class="p-3 text-center">Manage</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventoryTableBody" class="divide-y divide-ocean-700">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 5: UPCOMING RELEASES CALENDAR -->
+        <section id="tab-releases" class="tab-content hidden flex flex-col gap-4">
+            <div class="bg-ocean-800 p-4 rounded-xl border border-ocean-700">
+                <h2 class="text-sm font-bold text-gold-400 mb-1">Bandai Official SA Release Schedule & Pre-Orders</h2>
+                <p class="text-xs text-gray-400">Estimated South Africa store landing dates & baseline distributor costs.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="releaseGrid">
+                <!-- Release cards populated dynamically -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL 1: STRATEGY CALCULATOR -->
+    <div id="calcModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-ocean-800 border border-ocean-600 rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl flex flex-col">
+            <div class="bg-ocean-900 px-6 py-4 border-b border-ocean-700 flex justify-between items-center">
+                <h3 class="text-sm font-bold text-gold-400 flex items-center gap-2">
+                    <i class="fa-solid fa-calculator"></i>
+                    Price Strategy & Profit Calculator
+                </h3>
+                <button onclick="closeCalcModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            
+            <div class="p-6 space-y-4 text-xs">
+                <div class="bg-ocean-900 p-3 rounded-lg border border-ocean-700 flex justify-between items-center">
+                    <div>
+                        <div class="text-sm font-bold text-gray-100" id="calcItemName">Product Name</div>
+                        <div class="text-gray-400 text-[11px]" id="calcItemCode">Code: OP-00</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-gray-400">SA Lowest: <span class="text-emerald-400 font-bold" id="calcLowestSA">R0</span></div>
+                        <div class="text-gray-400">Global (ZAR): <span class="text-blue-400 font-bold" id="calcGlobalZAR">R0</span></div>
+                    </div>
+                </div>
+
+                <!-- Presets -->
+                <div>
+                    <label class="text-gray-400 font-medium block mb-1">Apply Quick Strategy Preset:</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="applyPreset('undercut')" class="bg-ocean-700 hover:bg-ocean-600 border border-ocean-600 text-gray-200 py-1.5 px-2 rounded text-[11px]">Undercut SA Lowest (-R20)</button>
+                        <button onclick="applyPreset('average')" class="bg-ocean-700 hover:bg-ocean-600 border border-ocean-600 text-gray-200 py-1.5 px-2 rounded text-[11px]">Match SA Market Average</button>
+                        <button onclick="applyPreset('global')" class="bg-ocean-700 hover:bg-ocean-600 border border-ocean-600 text-gray-200 py-1.5 px-2 rounded text-[11px]">Match Global TCG Benchmark</button>
+                        <button onclick="applyPreset('margin25')" class="bg-ocean-700 hover:bg-ocean-600 border border-ocean-600 text-gray-200 py-1.5 px-2 rounded text-[11px]">Target 25% Profit Margin</button>
+                    </div>
+                </div>
+
+                <!-- Inputs -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-gray-400 block mb-1">Landed / Wholesale Cost (ZAR)</label>
+                        <input type="number" id="calcCost" oninput="runCalculator()" class="w-full bg-ocean-900 border border-ocean-600 p-2 rounded text-gray-100 font-bold focus:border-gold-500">
+                    </div>
+                    <div>
+                        <label class="text-gray-400 block mb-1">Proposed Retail Price (ZAR)</label>
+                        <input type="number" id="calcPrice" oninput="runCalculator()" class="w-full bg-ocean-900 border border-ocean-600 p-2 rounded text-gold-400 font-bold focus:border-gold-500">
+                    </div>
+                    <div>
+                        <label class="text-gray-400 block mb-1">Overhead / Shipping (ZAR)</label>
+                        <input type="number" id="calcOverhead" value="50" oninput="runCalculator()" class="w-full bg-ocean-900 border border-ocean-600 p-2 rounded text-gray-100">
+                    </div>
+                    <div class="flex items-center gap-2 pt-5">
+                        <input type="checkbox" id="calcVat" onchange="runCalculator()" class="rounded border-ocean-600 bg-ocean-900 text-gold-500 focus:ring-0">
+                        <label for="calcVat" class="text-gray-300">Deduct 15% SA VAT</label>
+                    </div>
+                </div>
+
+                <!-- Outputs -->
+                <div class="bg-ocean-900 p-4 rounded-xl border border-ocean-700 space-y-2">
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="text-gray-400">Net Profit per Unit:</span>
+                        <span id="calcNetProfit" class="font-extrabold text-emerald-400 text-base">R0.00</span>
+                    </div>
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="text-gray-400">Profit Margin:</span>
+                        <span id="calcMarginPct" class="font-extrabold text-gold-400 text-base">0%</span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs pt-1 border-t border-ocean-800">
+                        <span class="text-gray-400">Market Positioning:</span>
+                        <span id="calcPositionBadge" class="px-2 py-0.5 rounded text-[10px] font-bold bg-gray-700 text-gray-300">Balanced</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-ocean-900 px-6 py-3 border-t border-ocean-700 flex justify-end gap-2">
+                <button onclick="saveCalcToInventory()" class="bg-gold-500 hover:bg-gold-600 text-ocean-900 font-bold px-4 py-2 rounded text-xs">Save To My Inventory</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: STORE BREAKDOWN DRAWER -->
+    <div id="storeModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-ocean-800 border border-ocean-600 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col">
+            <div class="bg-ocean-900 px-6 py-4 border-b border-ocean-700 flex justify-between items-center">
+                <h3 class="text-sm font-bold text-gold-400 flex items-center gap-2">
+                    <i class="fa-solid fa-store"></i>
+                    SA Retail Store Price & Availability Breakdown
+                </h3>
+                <button onclick="closeStoreModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            
+            <div class="p-6 text-xs space-y-4">
+                <div class="text-sm font-bold text-gray-200" id="storeModalTitle">Product Name</div>
+                <div class="divide-y divide-ocean-700 border border-ocean-700 rounded-xl overflow-hidden" id="storeListContainer">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: CARD ARTWORK PREVIEW DRAWER -->
+    <div id="cardPreviewModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-ocean-800 border border-ocean-600 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl flex flex-col">
+            <div class="bg-ocean-900 px-4 py-3 border-b border-ocean-700 flex justify-between items-center">
+                <h3 class="text-xs font-bold text-gold-400">Card Artwork & Meta Details</h3>
+                <button onclick="closeCardPreviewModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-6 text-xs flex flex-col items-center gap-4 text-center">
+                <div id="cardPreviewVisual" class="w-48 h-64 rounded-xl border-2 border-gold-500/50 bg-ocean-900 flex flex-col justify-between p-4 shadow-xl">
+                    <!-- Dynamic visual card block -->
+                </div>
+                <div>
+                    <h4 class="text-base font-bold text-gray-100" id="prevCardName">Card Name</h4>
+                    <p class="text-xs text-gold-400 font-semibold" id="prevCardMeta">OP01-000 | Secret Rare</p>
+                </div>
+                <div class="bg-ocean-900 p-3 rounded-lg border border-ocean-700 w-full text-left space-y-1">
+                    <div><span class="text-gray-400">Meta Usage Rating:</span> <span id="prevMetaRating" class="text-emerald-400 font-bold">Tier 1 Tournament staple</span></div>
+                    <div><span class="text-gray-400">Color Affinity:</span> <span id="prevCardColor" class="font-bold">Red</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 4: CRUD PRODUCT MANAGEMENT FORM -->
+    <div id="productModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-ocean-800 border border-ocean-600 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl flex flex-col">
+            <div class="bg-ocean-900 px-6 py-4 border-b border-ocean-700 flex justify-between items-center">
+                <h3 class="text-sm font-bold text-gold-400" id="productModalTitle">Add New Catalog Item</h3>
+                <button onclick="closeProductModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <form id="productForm" onsubmit="saveProduct(event)" class="p-6 space-y-3 text-xs">
+                <input type="hidden" id="pmId">
+                <div>
+                    <label class="text-gray-400 block mb-1">Item Name</label>
+                    <input type="text" id="pmName" required class="w-full bg-ocean-900 border border-ocean-600 p-2 rounded text-gray-100">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-gray-400 block mb-1">Code / Set ID</label>
+                        <input type="text" id="pmCode" required class="w-full bg-ocean-900 border border-ocean-600 p-2 rounded text-gray-100">
+                    </div>
+                    <div>
+                        <label class="text-gray-400 block mb-1">Category</label>
+                        <select id="pmCategory" class="w-full bg-ocean-900 border border-ocean-600 p-2 rounded text-gray-100">
+                            <option value="Sealed">Sealed Box / Deck</option>
+                            <option value="Single">Single Card</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-gray-400 block mb-1">SA Lowest (ZAR)</label>
+                        <input type="number" id="pmLowest" required class="w-full bg-ocean-900 border border-ocean-600 p-2 rounded text-gray-100">
+                    </div>
+                    <div>
+                        <label class="text-gray-400 block mb-1">SA Highest (ZAR)</label>
+                        <input type="number" id="pmHighest" required class="w-full bg-ocean-900 border border-ocean-600 p-2 rounded text-gray-100">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-gray-400 block mb-1">Global TCG Benchmark (USD)</label>
+                    <input type="number" step="0.01" id="pmGlobalUsd" required class="w-full bg-ocean-900 border border-ocean-600 p-2 rounded text-gray-100">
+                </div>
+
+                <div class="pt-3 flex justify-end gap-2">
+                    <button type="button" onclick="closeProductModal()" class="bg-ocean-700 px-4 py-2 rounded text-gray-300">Cancel</button>
+                    <button type="submit" class="bg-gold-500 text-ocean-900 font-bold px-4 py-2 rounded">Save Item</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        /* ==========================================================================
+           1. INITIAL DATA CATALOG & STATE MANAGEMENT
+           ========================================================================== */
+        
+        // Default South Africa Store Coverage List
+        const SA_STORES = [
+            'Solarpop (Official Distributor)',
+            'Level Up Store',
+            'The Big Bang Store',
+            'Mirage Gaming',
+            'Unplugged Games',
+            'Underworld Connections',
+            'Sad Robot',
+            'Dracarys Gaming',
+            'Top Deck'
+        ];
+
+        // Master Catalog Dataset
+        const MASTER_CATALOG = [
+            // SEALED PRODUCTS
+            { id: 'S1', category: 'Sealed', name: 'OP-01 Romance Dawn Booster Box', code: 'OP-01', subType: 'Booster Box', lowestSA: 4200, highestSA: 5500, globalUsd: 220, demandScore: 98 },
+            { id: 'S2', category: 'Sealed', name: 'OP-02 Paramount War Booster Box', code: 'OP-02', subType: 'Booster Box', lowestSA: 2800, highestSA: 3400, globalUsd: 145, demandScore: 82 },
+            { id: 'S3', category: 'Sealed', name: 'OP-03 Pillars of Strength Booster Box', code: 'OP-03', subType: 'Booster Box', lowestSA: 2400, highestSA: 2900, globalUsd: 125, demandScore: 75 },
+            { id: 'S4', category: 'Sealed', name: 'OP-04 Kingdoms of Intrigue Booster Box', code: 'OP-04', subType: 'Booster Box', lowestSA: 2200, highestSA: 2700, globalUsd: 115, demandScore: 70 },
+            { id: 'S5', category: 'Sealed', name: 'OP-05 Awakening of the New Era Box', code: 'OP-05', subType: 'Booster Box', lowestSA: 3800, highestSA: 4600, globalUsd: 195, demandScore: 99 },
+            { id: 'S6', category: 'Sealed', name: 'OP-06 Wings of the Captain Booster Box', code: 'OP-06', subType: 'Booster Box', lowestSA: 2500, highestSA: 3100, globalUsd: 130, demandScore: 85 },
+            { id: 'S7', category: 'Sealed', name: 'OP-07 500 Years Into The Future Box', code: 'OP-07', subType: 'Booster Box', lowestSA: 2300, highestSA: 2800, globalUsd: 120, demandScore: 88 },
+            { id: 'S8', category: 'Sealed', name: 'OP-08 Two Legends Booster Box', code: 'OP-08', subType: 'Booster Box', lowestSA: 2350, highestSA: 2850, globalUsd: 122, demandScore: 80 },
+            { id: 'S9', category: 'Sealed', name: 'OP-09 The Four Emperors Booster Box', code: 'OP-09', subType: 'Booster Box', lowestSA: 2600, highestSA: 3200, globalUsd: 138, demandScore: 94 },
+            { id: 'S10', category: 'Sealed', name: 'OP-10 Royal Blood Booster Box', code: 'OP-10', subType: 'Booster Box', lowestSA: 2700, highestSA: 3300, globalUsd: 140, demandScore: 91 },
+            { id: 'S11', category: 'Sealed', name: 'EB-01 Extra Booster Memorial Collection', code: 'EB-01', subType: 'Booster Box', lowestSA: 1800, highestSA: 2300, globalUsd: 95, demandScore: 78 },
+            { id: 'S12', category: 'Sealed', name: 'PRB-01 Premium Booster The Best Box', code: 'PRB-01', subType: 'Booster Box', lowestSA: 3100, highestSA: 3800, globalUsd: 165, demandScore: 96 },
+            { id: 'S13', category: 'Sealed', name: '1st Anniversary Set Limited Box', code: 'ANNIV-1', subType: 'Anniversary', lowestSA: 4500, highestSA: 6000, globalUsd: 250, demandScore: 90 },
+            { id: 'S14', category: 'Sealed', name: '2nd Anniversary Premium Set', code: 'ANNIV-2', subType: 'Anniversary', lowestSA: 4800, highestSA: 6200, globalUsd: 260, demandScore: 92 },
+            { id: 'S15', category: 'Sealed', name: 'ST-01 Straw Hat Crew Starter Deck', code: 'ST-01', subType: 'Starter Deck', lowestSA: 350, highestSA: 500, globalUsd: 22, demandScore: 84 },
+            { id: 'S16', category: 'Sealed', name: 'ST-10 Three Captains Ultimate Deck', code: 'ST-10', subType: 'Starter Deck', lowestSA: 650, highestSA: 850, globalUsd: 38, demandScore: 95 },
+            { id: 'S17', category: 'Sealed', name: 'ST-13 Three Brothers Ultra Deck', code: 'ST-13', subType: 'Starter Deck', lowestSA: 750, highestSA: 950, globalUsd: 42, demandScore: 93 },
+
+            // SINGLE CARDS
+            { id: 'C1', category: 'Single', name: 'Tony Tony.Chopper', code: 'OP01-006', rarity: 'C', color: 'Red', set: 'OP-01', lowestSA: 15, highestSA: 30, globalUsd: 0.80, demandScore: 60, meta: 'Red aggro searcher' },
+            { id: 'C2', category: 'Single', name: 'Nami (Searcher)', code: 'OP01-016', rarity: 'C', color: 'Red', set: 'OP-01', lowestSA: 45, highestSA: 80, globalUsd: 2.50, demandScore: 89, meta: 'Essential Red Staple' },
+            { id: 'C3', category: 'Single', name: 'Edward.Newgate', code: 'OP02-004', rarity: 'UC', color: 'Red', set: 'OP-02', lowestSA: 35, highestSA: 60, globalUsd: 1.80, demandScore: 75, meta: 'Whitebeard core card' },
+            { id: 'C4', category: 'Single', name: 'Radical Beam!', code: 'OP05-005', rarity: 'UC', color: 'Red', set: 'OP-05', lowestSA: 40, highestSA: 70, globalUsd: 2.10, demandScore: 88, meta: 'Top Counter Event' },
+            { id: 'C5', category: 'Single', name: 'Gum-Gum Giant', code: 'OP07-015', rarity: 'C', color: 'Red', set: 'OP-07', lowestSA: 20, highestSA: 35, globalUsd: 1.00, demandScore: 65, meta: 'Defensive Staple' },
+            
+            // Rares, SRs, SECs & Leaders
+            { id: 'C6', category: 'Single', name: 'Shanks (Secret Rare)', code: 'OP01-120', rarity: 'SEC', color: 'Red', set: 'OP-01', lowestSA: 750, highestSA: 1100, globalUsd: 45.00, demandScore: 91, meta: 'Late game finisher' },
+            { id: 'C7', category: 'Single', name: 'Monkey.D.Luffy (Gear 5 SEC)', code: 'OP05-119', rarity: 'SEC', color: 'Purple', set: 'OP-05', lowestSA: 1200, highestSA: 1650, globalUsd: 70.00, demandScore: 99, meta: 'Tier 0 Gear 5 Engine' },
+            { id: 'C8', category: 'Single', name: 'Shanks (Leader)', code: 'OP09-001', rarity: 'Leader', color: 'Red', set: 'OP-09', lowestSA: 350, highestSA: 500, globalUsd: 20.00, demandScore: 93, meta: 'Top Tier Meta Leader' },
+            { id: 'C9', category: 'Single', name: 'Roronoa Zoro (SEC)', code: 'OP06-118', rarity: 'SEC', color: 'Green', set: 'OP-06', lowestSA: 850, highestSA: 1200, globalUsd: 50.00, demandScore: 87, meta: 'Green aggro boss' },
+            { id: 'C10', category: 'Single', name: 'Monkey.D.Luffy (Purple Leader)', code: 'OP05-060', rarity: 'Leader', color: 'Purple', set: 'OP-05', lowestSA: 250, highestSA: 400, globalUsd: 15.00, demandScore: 90, meta: 'Ramp Leader Staple' },
+
+            // Manga Rares & Alt Arts
+            { id: 'C11', category: 'Single', name: 'Shanks (Manga Rare)', code: 'OP01-120-MR', rarity: 'Manga Rare', color: 'Red', set: 'OP-01', lowestSA: 18500, highestSA: 24000, globalUsd: 1100.00, demandScore: 100, meta: 'Grail Collector Card' },
+            { id: 'C12', category: 'Single', name: 'Monkey.D.Luffy Gear 5 (Manga Rare)', code: 'OP05-119-MR', rarity: 'Manga Rare', color: 'Purple', set: 'OP-05', lowestSA: 32000, highestSA: 42000, globalUsd: 1900.00, demandScore: 100, meta: 'Ultra Grail Chase' },
+            { id: 'C13', category: 'Single', name: 'Portgas.D.Ace (Manga Rare)', code: 'OP09-119-MR', rarity: 'Manga Rare', color: 'Red', set: 'OP-09', lowestSA: 22000, highestSA: 29000, globalUsd: 1350.00, demandScore: 98, meta: 'High Value Grail' }
+        ];
+
+        // Upcoming Bandai Release Schedule Data
+        const UPCOMING_RELEASES = [
+            { name: 'OP-11 Royal Lineage Booster Box', releaseDate: 'Q2 2026', estCost: 'R2,450', status: 'Pre-Orders Open', hype: 'High' },
+            { name: 'ST-21 Ex-Navy Starter Deck', releaseDate: 'May 2026', estCost: 'R380', status: 'Upcoming', hype: 'Medium' },
+            { name: 'EB-02 Anime 25th Collection', releaseDate: 'July 2026', estCost: 'R1,950', status: 'Announced', hype: 'Very High' }
+        ];
+
+        // Global State
+        let catalog = [];
+        let inventory = {}; // Keyed by item ID: { count, landedCost, sellPrice }
+        let currentTab = 'sealed';
+        let chartInstance = null;
+
+        /* ==========================================================================
+           2. APP INITIALIZATION & LOCAL STORAGE
+           ========================================================================== */
+        
+        window.addEventListener('DOMContentLoaded', () => {
+            loadState();
+            setupEventListeners();
+            renderAll();
+        });
+
+        function loadState() {
+            const savedCatalog = localStorage.getItem('op_tcg_sa_catalog');
+            if (savedCatalog) {
+                try { catalog = JSON.parse(savedCatalog); } catch(e) { catalog = [...MASTER_CATALOG]; }
+            } else {
+                catalog = [...MASTER_CATALOG];
+            }
+
+            const savedInv = localStorage.getItem('op_tcg_sa_inventory');
+            if (savedInv) {
+                try { inventory = JSON.parse(savedInv); } catch(e) { inventory = {}; }
+            }
+        }
+
+        function saveState() {
+            localStorage.setItem('op_tcg_sa_catalog', JSON.stringify(catalog));
+            localStorage.setItem('op_tcg_sa_inventory', JSON.stringify(inventory));
+        }
+
+        function setupEventListeners() {
+            document.getElementById('usdZarInput').addEventListener('input', () => {
+                renderAll();
+            });
+        }
+
+        function getUsdZarRate() {
+            const val = parseFloat(document.getElementById('usdZarInput').value);
+            return isNaN(val) ? 18.50 : val;
+        }
+
+        // Global ZAR conversion function including 1.15x SA Logistics import multiplier
+        function calcGlobalZar(usd) {
+            const rate = getUsdZarRate();
+            return (usd * rate * 1.15).toFixed(2);
+        }
+
+        /* ==========================================================================
+           3. UI NAVIGATION & RENDERING ENGINES
+           ========================================================================== */
+
+        function switchTab(tabId) {
+            currentTab = tabId;
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-ocean-800', 'text-gold-400', 'border-gold-500');
+                btn.classList.add('bg-ocean-900', 'text-gray-400', 'border-transparent');
+            });
+
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`tabBtn-${tabId}`);
+            activeBtn.classList.add('bg-ocean-800', 'text-gold-400', 'border-gold-500');
+            activeBtn.classList.remove('bg-ocean-900', 'text-gray-400', 'border-transparent');
+
+            if (tabId === 'analytics') {
+                initAnalyticsChart();
+            }
+        }
+
+        function renderAll() {
+            updateQuickStats();
+            renderSealedTable();
+            renderSinglesTable();
+            renderInventoryTable();
+            renderReleasesGrid();
+            populateAnalyticsDropdown();
+        }
+
+        function updateQuickStats() {
+            document.getElementById('statTotalItems').innerText = catalog.length;
+            
+            let totalLowest = 0;
+            let totalGlobalZar = 0;
+
+            catalog.forEach(item => {
+                totalLowest += item.lowestSA;
+                totalGlobalZar += parseFloat(calcGlobalZar(item.globalUsd));
+            });
+
+            document.getElementById('statLowestAvg').innerText = `R${totalLowest.toLocaleString('en-ZA', {minimumFractionDigits: 0})}`;
+            document.getElementById('statGlobalAvg').innerText = `R${totalGlobalZar.toLocaleString('en-ZA', {minimumFractionDigits: 0})}`;
+        }
+
+        /* ==========================================================================
+           4. TABLE RENDERING (SEALED & SINGLES)
+           ========================================================================== */
+
+        function renderSealedTable() {
+            const tbody = document.getElementById('sealedTableBody');
+            const search = document.getElementById('sealedSearch').value.toLowerCase();
+            const typeFilter = document.getElementById('sealedTypeFilter').value;
+
+            const filtered = catalog.filter(i => i.category === 'Sealed' &&
+                (i.name.toLowerCase().includes(search) || i.code.toLowerCase().includes(search)) &&
+                (typeFilter === 'ALL' || i.subType === typeFilter)
+            );
+
+            tbody.innerHTML = filtered.map(item => {
+                const avgSA = Math.round((item.lowestSA + item.highestSA) / 2);
+                const globalZar = calcGlobalZar(item.globalUsd);
+
+                return `
+                    <tr class="hover:bg-ocean-700/50 transition">
+                        <td class="p-3 font-semibold text-gray-100 flex items-center gap-2">
+                            <i class="fa-solid fa-box text-gold-400"></i>
+                            ${item.name}
+                        </td>
+                        <td class="p-3"><span class="bg-ocean-900 border border-ocean-600 px-2 py-0.5 rounded text-[10px] font-mono">${item.code}</span></td>
+                        <td class="p-3 text-emerald-400 font-bold">R${item.lowestSA.toLocaleString()}</td>
+                        <td class="p-3 text-gray-200">R${avgSA.toLocaleString()}</td>
+                        <td class="p-3 text-crimson-500">R${item.highestSA.toLocaleString()}</td>
+                        <td class="p-3 font-mono">$${item.globalUsd.toFixed(2)}</td>
+                        <td class="p-3 text-blue-400 font-bold">R${parseFloat(globalZar).toLocaleString()}</td>
+                        <td class="p-3 text-center space-x-1">
+                            <button onclick="openCalcModal('${item.id}')" class="bg-gold-500 hover:bg-gold-600 text-ocean-900 px-2 py-1 rounded text-[11px] font-bold" title="Calculate Strategy">
+                                <i class="fa-solid fa-calculator"></i>
+                            </button>
+                            <button onclick="openStoreModal('${item.id}')" class="bg-ocean-700 hover:bg-ocean-600 text-gray-200 px-2 py-1 rounded text-[11px]" title="Compare SA Stores">
+                                <i class="fa-solid fa-store"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('') || `<tr><td colspan="8" class="p-4 text-center text-gray-500">No sealed products found matching filter.</td></tr>`;
+        }
+
+        function renderSinglesTable() {
+            const tbody = document.getElementById('singlesTableBody');
+            const search = document.getElementById('singlesSearch').value.toLowerCase();
+            const rarity = document.getElementById('rarityFilter').value;
+            const color = document.getElementById('colorFilter').value;
+            const set = document.getElementById('setFilter').value;
+
+            const filtered = catalog.filter(i => i.category === 'Single' &&
+                (i.name.toLowerCase().includes(search) || i.code.toLowerCase().includes(search)) &&
+                (rarity === 'ALL' || i.rarity === rarity) &&
+                (color === 'ALL' || i.color === color) &&
+                (set === 'ALL' || i.set === set)
+            );
+
+            tbody.innerHTML = filtered.map(item => {
+                const avgSA = Math.round((item.lowestSA + item.highestSA) / 2);
+                const globalZar = calcGlobalZar(item.globalUsd);
+                const colorBadge = getColorBadgeClass(item.color);
+
+                return `
+                    <tr class="hover:bg-ocean-700/50 transition">
+                        <td class="p-3 font-semibold text-gray-100 flex items-center gap-2">
+                            <i class="fa-regular fa-clone text-gold-400"></i>
+                            ${item.name}
+                        </td>
+                        <td class="p-3"><span class="bg-ocean-900 border border-ocean-600 px-2 py-0.5 rounded text-[10px] font-mono text-gold-400">${item.code}</span></td>
+                        <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-ocean-900 border border-ocean-600 text-gray-300">${item.rarity}</span></td>
+                        <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${colorBadge}">${item.color}</span></td>
+                        <td class="p-3 text-emerald-400 font-bold">R${item.lowestSA.toLocaleString()}</td>
+                        <td class="p-3 text-gray-200">R${avgSA.toLocaleString()}</td>
+                        <td class="p-3 font-mono">$${item.globalUsd.toFixed(2)}</td>
+                        <td class="p-3 text-blue-400 font-bold">R${parseFloat(globalZar).toLocaleString()}</td>
+                        <td class="p-3 text-center space-x-1">
+                            <button onclick="openCardPreviewModal('${item.id}')" class="bg-ocean-700 hover:bg-ocean-600 text-gold-400 px-2 py-1 rounded text-[11px]" title="Visual Preview">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                            <button onclick="openCalcModal('${item.id}')" class="bg-gold-500 hover:bg-gold-600 text-ocean-900 px-2 py-1 rounded text-[11px] font-bold" title="Calculate Strategy">
+                                <i class="fa-solid fa-calculator"></i>
+                            </button>
+                            <button onclick="openStoreModal('${item.id}')" class="bg-ocean-700 hover:bg-ocean-600 text-gray-200 px-2 py-1 rounded text-[11px]" title="Compare SA Stores">
+                                <i class="fa-solid fa-store"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('') || `<tr><td colspan="9" class="p-4 text-center text-gray-500">No single cards found matching filter.</td></tr>`;
+        }
+
+        function getColorBadgeClass(color) {
+            switch(color) {
+                case 'Red': return 'bg-red-950 text-red-400 border border-red-800';
+                case 'Green': return 'bg-emerald-950 text-emerald-400 border border-emerald-800';
+                case 'Blue': return 'bg-blue-950 text-blue-400 border border-blue-800';
+                case 'Purple': return 'bg-purple-950 text-purple-400 border border-purple-800';
+                case 'Black': return 'bg-gray-900 text-gray-300 border border-gray-700';
+                case 'Yellow': return 'bg-amber-950 text-amber-400 border border-amber-800';
+                default: return 'bg-ocean-900 text-gray-400';
+            }
+        }
+
+        /* ==========================================================================
+           5. MARKET ANALYTICS MODULE
+           ========================================================================== */
+
+        function populateAnalyticsDropdown() {
+            const select = document.getElementById('analyticsItemSelect');
+            select.innerHTML = catalog.map(i => `<option value="${i.id}">${i.code} - ${i.name}</option>`).join('');
+        }
+
+        function initAnalyticsChart() {
+            const ctx = document.getElementById('marketChart').getContext('2d');
+            const selectedId = document.getElementById('analyticsItemSelect').value || catalog[0].id;
+            const item = catalog.find(i => i.id === selectedId) || catalog[0];
+
+            const avgSA = Math.round((item.lowestSA + item.highestSA) / 2);
+            const globalZar = parseFloat(calcGlobalZar(item.globalUsd));
+
+            // Generate synthetic trend data based on current price
+            const labels = ['90 Days Ago', '60 Days Ago', '30 Days Ago', 'Current'];
+            const saPrices = [Math.round(avgSA * 0.85), Math.round(avgSA * 0.92), Math.round(avgSA * 0.97), avgSA];
+            const globalPrices = [Math.round(globalZar * 0.88), Math.round(globalZar * 0.90), Math.round(globalZar * 0.95), globalZar];
+
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'SA Average Price (ZAR)',
+                            data: saPrices,
+                            borderColor: '#f59e0b',
+                            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.3
+                        },
+                        {
+                            label: 'Global Benchmark (ZAR landed)',
+                            data: globalPrices,
+                            borderColor: '#60a5fa',
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            tension: 0.3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#9ca3af', font: { size: 11 } } }
+                    },
+                    scales: {
+                        x: { grid: { color: '#1f293d' }, ticks: { color: '#9ca3af' } },
+                        y: { grid: { color: '#1f293d' }, ticks: { color: '#9ca3af' } }
+                    }
+                }
+            });
+
+            // Render Demand Matrix Insights
+            const demandContainer = document.getElementById('demandList');
+            const topDemand = [...catalog].sort((a,b) => b.demandScore - a.demandScore).slice(0, 5);
+            
+            demandContainer.innerHTML = topDemand.map(i => `
+                <div class="flex justify-between items-center bg-ocean-900 p-2.5 rounded-lg border border-ocean-700">
+                    <div>
+                        <div class="font-bold text-gray-200 text-xs">${i.name}</div>
+                        <div class="text-[10px] text-gold-400">${i.code} | Score: ${i.demandScore}/100</div>
+                    </div>
+                    <span class="text-xs font-bold text-emerald-400">R${i.lowestSA.toLocaleString()}</span>
+                </div>
+            `).join('');
+        }
+
+        function updateAnalyticsChart() {
+            initAnalyticsChart();
+        }
+
+        /* ==========================================================================
+           6. SHOP INVENTORY MANAGEMENT MODULE
+           ========================================================================== */
+
+        function renderInventoryTable() {
+            const tbody = document.getElementById('inventoryTableBody');
+            let totalCount = 0;
+            let totalLanded = 0;
+            let totalValue = 0;
+
+            const rows = Object.keys(inventory).map(itemId => {
+                const item = catalog.find(c => c.id === itemId);
+                if (!item) return '';
+
+                const invData = inventory[itemId];
+                const count = invData.count || 0;
+                const landedCost = invData.landedCost || 0;
+                const sellPrice = invData.sellPrice || 0;
+
+                const unitMargin = sellPrice - landedCost;
+                const assetValue = count * sellPrice;
+
+                totalCount += count;
+                totalLanded += (count * landedCost);
+                totalValue += assetValue;
+
+                return `
+                    <tr class="hover:bg-ocean-700/50">
+                        <td class="p-3 font-semibold text-gray-100">${item.name} <span class="text-gold-400 text-[10px]">(${item.code})</span></td>
+                        <td class="p-3">
+                            <input type="number" min="0" value="${count}" onchange="updateInventoryItem('${item.id}', 'count', this.value)" class="w-16 bg-ocean-900 border border-ocean-600 px-2 py-1 rounded text-gray-100 font-bold">
+                        </td>
+                        <td class="p-3">
+                            R<input type="number" min="0" value="${landedCost}" onchange="updateInventoryItem('${item.id}', 'landedCost', this.value)" class="w-20 bg-ocean-900 border border-ocean-600 px-2 py-1 rounded text-gray-100 font-bold">
+                        </td>
+                        <td class="p-3">
+                            R<input type="number" min="0" value="${sellPrice}" onchange="updateInventoryItem('${item.id}', 'sellPrice', this.value)" class="w-20 bg-ocean-900 border border-ocean-600 px-2 py-1 rounded text-gold-400 font-bold">
+                        </td>
+                        <td class="p-3 font-bold ${unitMargin >= 0 ? 'text-emerald-400' : 'text-crimson-500'}">R${unitMargin.toFixed(2)}</td>
+                        <td class="p-3 text-gold-400 font-bold">R${assetValue.toFixed(2)}</td>
+                        <td class="p-3 text-center">
+                            <button onclick="removeInventoryItem('${item.id}')" class="text-crimson-500 hover:text-crimson-600"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            }).filter(Boolean);
+
+            tbody.innerHTML = rows.join('') || `<tr><td colspan="7" class="p-4 text-center text-gray-500">No inventory tracked yet. Click "Calculate Strategy" on any item to add it.</td></tr>`;
+
+            document.getElementById('invTotalCount').innerText = `${totalCount} Units`;
+            document.getElementById('invTotalCost').innerText = `R${totalLanded.toLocaleString('en-ZA', {minimumFractionDigits: 2})}`;
+            document.getElementById('invTotalValue').innerText = `R${totalValue.toLocaleString('en-ZA', {minimumFractionDigits: 2})}`;
+        }
+
+        function updateInventoryItem(id, field, value) {
+            if (!inventory[id]) inventory[id] = { count: 0, landedCost: 0, sellPrice: 0 };
+            inventory[id][field] = parseFloat(value) || 0;
+            saveState();
+            renderInventoryTable();
+        }
+
+        function removeInventoryItem(id) {
+            delete inventory[id];
+            saveState();
+            renderInventoryTable();
+        }
+
+        /* ==========================================================================
+           7. RELEASE RADAR MODULE
+           ========================================================================== */
+
+        function renderReleasesGrid() {
+            const container = document.getElementById('releaseGrid');
+            container.innerHTML = UPCOMING_RELEASES.map(rel => `
+                <div class="bg-ocean-800 p-4 rounded-xl border border-ocean-700 space-y-2 relative overflow-hidden shadow">
+                    <div class="flex justify-between items-start">
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-gold-500 text-ocean-900">${rel.status}</span>
+                        <span class="text-xs text-gray-400 font-mono">${rel.releaseDate}</span>
+                    </div>
+                    <h3 class="font-bold text-gray-100 text-sm">${rel.name}</h3>
+                    <div class="flex justify-between items-center text-xs pt-2 border-t border-ocean-700">
+                        <span class="text-gray-400">Est. Wholesale Cost:</span>
+                        <span class="font-bold text-emerald-400">${rel.estCost}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        /* ==========================================================================
+           8. MODALS & INTERACTIVE STRATEGY CALCULATOR
+           ========================================================================== */
+
+        let activeCalcItemId = null;
+
+        function openCalcModal(itemId) {
+            activeCalcItemId = itemId;
+            const item = catalog.find(i => i.id === itemId);
+            if (!item) return;
+
+            document.getElementById('calcItemName').innerText = item.name;
+            document.getElementById('calcItemCode').innerText = `Set Code: ${item.code}`;
+            document.getElementById('calcLowestSA').innerText = `R${item.lowestSA}`;
+            document.getElementById('calcGlobalZAR').innerText = `R${calcGlobalZar(item.globalUsd)}`;
+
+            // Populate defaults
+            const existing = inventory[itemId] || {};
+            document.getElementById('calcCost').value = existing.landedCost || Math.round(item.lowestSA * 0.7);
+            document.getElementById('calcPrice').value = existing.sellPrice || item.lowestSA;
+            document.getElementById('calcOverhead').value = 50;
+
+            runCalculator();
+            document.getElementById('calcModal').classList.remove('hidden');
+        }
+
+        function closeCalcModal() {
+            document.getElementById('calcModal').classList.add('hidden');
+        }
+
+        function runCalculator() {
+            const cost = parseFloat(document.getElementById('calcCost').value) || 0;
+            const price = parseFloat(document.getElementById('calcPrice').value) || 0;
+            const overhead = parseFloat(document.getElementById('calcOverhead').value) || 0;
+            const vatChecked = document.getElementById('calcVat').checked;
+
+            let effectivePrice = price;
+            if (vatChecked) {
+                effectivePrice = price / 1.15; // Exclude VAT from revenue
+            }
+
+            const netProfit = effectivePrice - cost - overhead;
+            const marginPct = price > 0 ? ((netProfit / price) * 100) : 0;
+
+            document.getElementById('calcNetProfit').innerText = `R${netProfit.toFixed(2)}`;
+            document.getElementById('calcMarginPct').innerText = `${marginPct.toFixed(1)}%`;
+
+            // Badge positioning assessment
+            const badge = document.getElementById('calcPositionBadge');
+            if (marginPct < 10) {
+                badge.innerText = 'Aggressive / Low Margin';
+                badge.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-crimson-600 text-white';
+            } else if (marginPct <= 30) {
+                badge.innerText = 'Balanced Market Price';
+                badge.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-gold-500 text-ocean-900';
+            } else {
+                badge.innerText = 'High Premium Price';
+                badge.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-600 text-white';
+            }
+        }
+
+        function applyPreset(type) {
+            const item = catalog.find(i => i.id === activeCalcItemId);
+            if (!item) return;
+
+            const cost = parseFloat(document.getElementById('calcCost').value) || 0;
+            const priceInput = document.getElementById('calcPrice');
+
+            if (type === 'undercut') {
+                priceInput.value = Math.max(0, item.lowestSA - 20);
+            } else if (type === 'average') {
+                priceInput.value = Math.round((item.lowestSA + item.highestSA) / 2);
+            } else if (type === 'global') {
+                priceInput.value = Math.round(parseFloat(calcGlobalZar(item.globalUsd)));
+            } else if (type === 'margin25') {
+                const overhead = parseFloat(document.getElementById('calcOverhead').value) || 0;
+                priceInput.value = Math.round((cost + overhead) * 1.33); // Gives approx 25% gross margin
+            }
+
+            runCalculator();
+        }
+
+        function saveCalcToInventory() {
+            if (!activeCalcItemId) return;
+            const cost = parseFloat(document.getElementById('calcCost').value) || 0;
+            const price = parseFloat(document.getElementById('calcPrice').value) || 0;
+
+            const currentCount = inventory[activeCalcItemId]?.count || 1;
+            inventory[activeCalcItemId] = {
+                count: currentCount,
+                landedCost: cost,
+                sellPrice: price
+            };
+
+            saveState();
+            closeCalcModal();
+            renderInventoryTable();
+            switchTab('inventory');
+        }
+
+        // STORE BREAKDOWN MODAL
+        function openStoreModal(itemId) {
+            const item = catalog.find(i => i.id === itemId);
+            if (!item) return;
+
+            document.getElementById('storeModalTitle').innerText = `${item.name} (${item.code})`;
+            const container = document.getElementById('storeListContainer');
+
+            // Generate representative store pricing around lowest/highest range
+            container.innerHTML = SA_STORES.map((store, idx) => {
+                const price = Math.round(item.lowestSA + (idx * ((item.highestSA - item.lowestSA) / (SA_STORES.length - 1))));
+                const inStock = idx % 2 === 0 || idx === 0;
+
+                return `
+                    <div class="p-3 flex justify-between items-center bg-ocean-800 hover:bg-ocean-700/50">
+                        <div>
+                            <div class="font-bold text-gray-100">${store}</div>
+                            <div class="text-[10px] ${inStock ? 'text-emerald-400' : 'text-crimson-500'}">
+                                ${inStock ? '<i class="fa-solid fa-check"></i> In Stock' : '<i class="fa-solid fa-xmark"></i> Out of Stock'}
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-bold text-gold-400 text-sm">R${price.toLocaleString()}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('storeModal').classList.remove('hidden');
+        }
+
+        function closeStoreModal() {
+            document.getElementById('storeModal').classList.add('hidden');
+        }
+
+        // CARD PREVIEW MODAL
+        function openCardPreviewModal(itemId) {
+            const item = catalog.find(i => i.id === itemId);
+            if (!item) return;
+
+            document.getElementById('prevCardName').innerText = item.name;
+            document.getElementById('prevCardMeta').innerText = `${item.code} | ${item.rarity}`;
+            document.getElementById('prevMetaRating').innerText = item.meta || 'Meta Tournament Playable';
+            document.getElementById('prevCardColor').innerText = item.color || 'Multi-Color';
+
+            // Generate Visual representation block
+            const visual = document.getElementById('cardPreviewVisual');
+            visual.innerHTML = `
+                <div class="text-left font-mono text-[10px] text-gold-400">${item.code}</div>
+                <div class="font-extrabold text-sm text-gray-100">${item.name}</div>
+                <div class="text-xs font-bold px-2 py-1 rounded bg-gold-500 text-ocean-900 inline-block self-center">${item.rarity}</div>
+            `;
+
+            document.getElementById('cardPreviewModal').classList.remove('hidden');
+        }
+
+        function closeCardPreviewModal() {
+            document.getElementById('cardPreviewModal').classList.add('hidden');
+        }
+
+        // CRUD PRODUCT FORM
+        function openProductModal(editId = null) {
+            if (editId) {
+                const item = catalog.find(i => i.id === editId);
+                if (!item) return;
+                document.getElementById('pmId').value = item.id;
+                document.getElementById('pmName').value = item.name;
+                document.getElementById('pmCode').value = item.code;
+                document.getElementById('pmCategory').value = item.category;
+                document.getElementById('pmLowest').value = item.lowestSA;
+                document.getElementById('pmHighest').value = item.highestSA;
+                document.getElementById('pmGlobalUsd').value = item.globalUsd;
+                document.getElementById('productModalTitle').innerText = 'Edit Catalog Item';
+            } else {
+                document.getElementById('productForm').reset();
+                document.getElementById('pmId').value = '';
+                document.getElementById('productModalTitle').innerText = 'Add New Catalog Item';
+            }
+            document.getElementById('productModal').classList.remove('hidden');
+        }
+
+        function closeProductModal() {
+            document.getElementById('productModal').classList.add('hidden');
+        }
+
+        function saveProduct(e) {
+            e.preventDefault();
+            const id = document.getElementById('pmId').value || `CUSTOM-${Date.now()}`;
+            const newItem = {
+                id: id,
+                name: document.getElementById('pmName').value,
+                code: document.getElementById('pmCode').value,
+                category: document.getElementById('pmCategory').value,
+                subType: 'Custom Item',
+                rarity: 'SR',
+                color: 'Red',
+                set: 'Custom',
+                lowestSA: parseFloat(document.getElementById('pmLowest').value),
+                highestSA: parseFloat(document.getElementById('pmHighest').value),
+                globalUsd: parseFloat(document.getElementById('pmGlobalUsd').value),
+                demandScore: 75
+            };
+
+            const index = catalog.findIndex(i => i.id === id);
+            if (index >= 0) {
+                catalog[index] = newItem;
+            } else {
+                catalog.push(newItem);
+            }
+
+            saveState();
+            closeProductModal();
+            renderAll();
+        }
+
+        /* ==========================================================================
+           9. BACKUP & EXPORT MODULE
+           ========================================================================== */
+
+        function exportJSON() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({
+                catalog: catalog,
+                inventory: inventory
+            }, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `OP_TCG_SA_Backup_${new Date().toISOString().slice(0,10)}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+    </script>
+</body>
+</html>
