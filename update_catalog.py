@@ -1,136 +1,186 @@
-import json
-import requests
+"""
+OP TCG South Africa - catalog updater.
 
-# Master product list containing both Sealed and Singles datasets
-FALLBACK_CATALOG = [
-    {
-        "id": "OP01-BOX",
-        "name": "Romance Dawn Booster Box (OP-01)",
-        "category": "sealed",
-        "set": "OP-01",
-        "globalUsd": 220.00,
-        "stores": {"Solarpop": 3800, "LevelUp": 3950, "BigBang": 4100, "Mirage": 3900}
-    },
-    {
-        "id": "OP02-BOX",
-        "name": "Paramount War Booster Box (OP-02)",
-        "category": "sealed",
-        "set": "OP-02",
-        "globalUsd": 145.00,
-        "stores": {"Solarpop": 2800, "LevelUp": 3100, "BigBang": 3400, "Mirage": 3000}
-    },
-    {
-        "id": "OP03-BOX",
-        "name": "Pillars of Strength Booster Box (OP-03)",
-        "category": "sealed",
-        "set": "OP-03",
-        "globalUsd": 125.00,
-        "stores": {"Solarpop": 2400, "LevelUp": 2650, "BigBang": 2900}
-    },
-    {
-        "id": "OP04-BOX",
-        "name": "Kingdoms of Intrigue Booster Box (OP-04)",
-        "category": "sealed",
-        "set": "OP-04",
-        "globalUsd": 115.00,
-        "stores": {"Solarpop": 2200, "LevelUp": 2450, "BigBang": 2700}
-    },
-    {
-        "id": "OP05-BOX",
-        "name": "Awakening of the New Era Box (OP-05)",
-        "category": "sealed",
-        "set": "OP-05",
-        "globalUsd": 195.00,
-        "stores": {"Solarpop": 3800, "LevelUp": 4200, "BigBang": 4600}
-    },
-    {
-        "id": "OP06-BOX",
-        "name": "Wings of the Captain Booster Box (OP-06)",
-        "category": "sealed",
-        "set": "OP-06",
-        "globalUsd": 140.00,
-        "stores": {"Solarpop": 2600, "LevelUp": 2850, "BigBang": 3100}
-    },
-    {
-        "id": "OP07-BOX",
-        "name": "500 Years Into the Future Box (OP-07)",
-        "category": "sealed",
-        "set": "OP-07",
-        "globalUsd": 130.00,
-        "stores": {"Solarpop": 2500, "LevelUp": 2700, "BigBang": 2950}
-    },
-    {
-        "id": "OP08-BOX",
-        "name": "Two Legends Booster Box (OP-08)",
-        "category": "sealed",
-        "set": "OP-08",
-        "globalUsd": 125.00,
-        "stores": {"Solarpop": 2400, "LevelUp": 2600, "BigBang": 2800}
-    },
-    {
-        "id": "EB01-BOX",
-        "name": "Memorial Collection Extra Booster (EB-01)",
-        "category": "sealed",
-        "set": "EB-01",
-        "globalUsd": 110.00,
-        "stores": {"Solarpop": 2100, "LevelUp": 2250, "BigBang": 2400}
-    },
-    {
-        "id": "PRB01-BOX",
-        "name": "ONE PIECE CARD THE BEST (PRB-01)",
-        "category": "sealed",
-        "set": "PRB-01",
-        "globalUsd": 180.00,
-        "stores": {"Solarpop": 3400, "LevelUp": 3700, "BigBang": 3950}
-    },
-    {
-        "id": "OP01-120",
-        "name": "Shanks (Manga Alternate Art)",
-        "category": "singles",
-        "set": "OP-01",
-        "globalUsd": 1100.00,
-        "stores": {"LevelUp": 23500, "BigBang": 24000, "Mirage": 22500}
-    },
-    {
-        "id": "OP02-121",
-        "name": "Portgas.D.Ace (Manga Alternate Art)",
-        "category": "singles",
-        "set": "OP-02",
-        "globalUsd": 850.00,
-        "stores": {"LevelUp": 17500, "BigBang": 18200}
-    },
-    {
-        "id": "OP03-122",
-        "name": "Sabo (Manga Alternate Art)",
-        "category": "singles",
-        "set": "OP-03",
-        "globalUsd": 600.00,
-        "stores": {"LevelUp": 12500, "BigBang": 13000}
-    },
-    {
-        "id": "OP04-083",
-        "name": "Donquixote Doflamingo (SEC Alt)",
-        "category": "singles",
-        "set": "OP-04",
-        "globalUsd": 75.00,
-        "stores": {"LevelUp": 1550, "BigBang": 1700}
-    },
-    {
-        "id": "OP05-119",
-        "name": "Monkey.D.Luffy (Manga Alternate Art)",
-        "category": "singles",
-        "set": "OP-05",
-        "globalUsd": 2400.00,
-        "stores": {"LevelUp": 48000, "BigBang": 51000}
-    }
+Pulls live product data from tracked competitor stores and writes catalog.json
+in the shape the dashboard (optcg-dashboard.html) expects:
+
+[
+  {
+    "id": "...",
+    "name": "...",
+    "set": "...",
+    "category": "sealed" | "singles",
+    "globalUsd": 0,               # left at 0 unless a global benchmark is wired in
+    "stores": {"Store Name": price_in_zar, ...}
+  },
+  ...
 ]
 
+HOW EACH STORE IS HANDLED
+--------------------------
+Shopify stores (Level Up Store, The Big Bang Shop) expose every product as
+public JSON at <store>/products.json - no login, no scraping HTML, no
+selectors to break. We paginate through it and keep anything whose title
+contains "one piece".
+
+Stores NOT included here, and why:
+  - Solarpop: wholesale/trade distributor. Prices are hidden behind a
+    customer login and everything shows "Out of Stock" publicly. This looks
+    like a supplier account, not a retail competitor - nothing to scrape
+    without trade credentials, and scraping a supplier's trade price to
+    compare against your own retail price would be comparing the wrong
+    numbers anyway.
+  - Mirage Gaming: WooCommerce store, but its live navigation only shows
+    Pokemon categories (Mega / Scarlet and Violet / Sword and Shield
+    singles). No One Piece section was visible. Confirm with them whether
+    they stock One Piece before adding a scraper for this one.
+  - Unplugged Games: this is a North Carolina, USA shop (prices in USD) -
+    not a South African competitor. Re-check the intended URL if you meant
+    a different store.
+
+ADDING A STORE LATER
+---------------------
+- Another Shopify store: just add its base URL to SHOPIFY_STORES below.
+- A WooCommerce store: needs a separate scraper (WooCommerce has no public
+  products.json by default) - ask for that when you have a confirmed URL.
+"""
+
+import json
+import re
+import time
+import requests
+
+# Shopify stores to pull from. Add more base URLs here as they're confirmed.
+SHOPIFY_STORES = {
+    "Level Up Store": "https://levelupstore.co.za",
+    "The Big Bang Shop": "https://bigbangshop.co.za",
+}
+
+KEYWORD = "one piece"
+REQUEST_TIMEOUT = 20
+PAGE_SIZE = 250  # Shopify's max per page
+USER_AGENT = "OPTCG-SA-Catalog-Bot/1.0 (+internal price comparison tool)"
+
+
+def fetch_shopify_products(base_url, keyword=KEYWORD):
+    """
+    Pull every product from a Shopify store's public /products.json feed,
+    paginating until an empty page is returned, and keep only products whose
+    title contains `keyword` (case-insensitive).
+
+    Returns a list of dicts: {title, price_zar, in_stock, vendor, product_type, url}
+    """
+    matches = []
+    page = 1
+    headers = {"User-Agent": USER_AGENT}
+
+    while True:
+        url = f"{base_url}/products.json"
+        params = {"limit": PAGE_SIZE, "page": page}
+        try:
+            resp = requests.get(url, params=params, headers=headers, timeout=REQUEST_TIMEOUT)
+            resp.raise_for_status()
+        except requests.RequestException as e:
+            print(f"  [warn] request failed for {base_url} page {page}: {e}")
+            break
+
+        try:
+            data = resp.json()
+        except ValueError:
+            print(f"  [warn] non-JSON response from {base_url} page {page}")
+            break
+
+        products = data.get("products", [])
+        if not products:
+            break  # no more pages
+
+        for p in products:
+            title = p.get("title", "")
+            if keyword.lower() not in title.lower():
+                continue
+
+            variants = p.get("variants", [])
+            if not variants:
+                continue
+
+            # Use the lowest-priced in-stock variant; if none are in stock,
+            # fall back to the lowest price overall so it still shows up
+            # (flagged as unavailable) rather than disappearing silently.
+            in_stock_variants = [v for v in variants if v.get("available")]
+            chosen_pool = in_stock_variants or variants
+            cheapest = min(chosen_pool, key=lambda v: float(v.get("price", "inf")))
+
+            matches.append({
+                "title": title,
+                "price_zar": float(cheapest.get("price", 0)),
+                "in_stock": bool(in_stock_variants),
+                "product_type": p.get("product_type", ""),
+                "vendor": p.get("vendor", ""),
+                "url": f"{base_url}/products/{p.get('handle', '')}",
+            })
+
+        page += 1
+        time.sleep(0.5)  # be polite - don't hammer the store's server
+
+    return matches
+
+
+def guess_category(title, product_type=""):
+    """Sealed product vs single card, based on title/type keywords."""
+    text = f"{title} {product_type}".lower()
+    sealed_signals = ["booster box", "booster pack", "starter deck", "display",
+                       "double pack", "case", "tin", "bundle", "elite trainer"]
+    if any(sig in text for sig in sealed_signals):
+        return "sealed"
+    return "singles"
+
+
+def guess_set(title):
+    """Pull an OP-##/EB-##/ST-## style set code out of the title if present."""
+    match = re.search(r"\b(OP|EB|ST|DP|PRB|IB|DF)-?\s?(\d{1,2})\b", title, re.IGNORECASE)
+    if match:
+        return f"{match.group(1).upper()}-{match.group(2).zfill(2)}"
+    return "Unknown"
+
+
+def slugify_id(title):
+    slug = re.sub(r"[^A-Za-z0-9]+", "-", title).strip("-").upper()
+    return slug[:40]
+
+
+def build_catalog():
+    catalog_by_key = {}  # key: normalized title -> merged record
+
+    for store_name, base_url in SHOPIFY_STORES.items():
+        print(f"Fetching {store_name} ({base_url}) ...")
+        products = fetch_shopify_products(base_url)
+        print(f"  found {len(products)} One Piece product(s)")
+
+        for prod in products:
+            key = prod["title"].strip().lower()
+            if key not in catalog_by_key:
+                catalog_by_key[key] = {
+                    "id": slugify_id(prod["title"]),
+                    "name": prod["title"],
+                    "set": guess_set(prod["title"]),
+                    "category": guess_category(prod["title"], prod["product_type"]),
+                    "globalUsd": 0,
+                    "stores": {},
+                }
+            # Only record a price if the item is in stock somewhere; an
+            # out-of-stock 0 would wrongly drag down the "lowest price".
+            if prod["in_stock"]:
+                catalog_by_key[key]["stores"][store_name] = prod["price_zar"]
+
+    return list(catalog_by_key.values())
+
+
 def update_catalog():
-    print("Updating catalog data...")
-    # Write updated dataset directly to catalog.json
+    catalog = build_catalog()
     with open("catalog.json", "w") as f:
-        json.dump(FALLBACK_CATALOG, f, indent=2)
-    print("catalog.json updated successfully.")
+        json.dump(catalog, f, indent=2, ensure_ascii=False)
+    print(f"\ncatalog.json written with {len(catalog)} product(s).")
+
 
 if __name__ == "__main__":
     update_catalog()
