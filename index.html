@@ -28,15 +28,14 @@
       </div>
 
       <div class="flex items-center gap-4">
-        <!-- USD / ZAR Exchange Rate Display -->
         <div class="bg-gray-900 border border-gray-800 px-3 py-1.5 rounded-lg flex items-center gap-2 text-xs">
           <span class="text-gray-400"><i class="fa-solid fa-dollar-sign text-amber-500"></i> USD/ZAR Rate:</span>
           <span id="usd-zar-display" class="font-bold text-amber-400">Fetching...</span>
           <span class="text-[10px] text-gray-500">(+15% Import)</span>
         </div>
 
-        <button onclick="resetToBuiltInCatalog()" class="bg-red-950/40 hover:bg-red-900/60 border border-red-800/50 text-red-300 text-xs px-3 py-1.5 rounded-lg transition">
-          <i class="fa-solid fa-rotate-left mr-1"></i> Reset Catalog
+        <button onclick="renderDashboard()" class="bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs px-3 py-1.5 rounded-lg transition">
+          <i class="fa-solid fa-sync mr-1"></i> Refresh UI
         </button>
       </div>
     </div>
@@ -59,7 +58,7 @@
       <div class="glass-panel rounded-xl p-4">
         <p class="text-xs text-gray-400 font-medium">Global Benchmark (ZAR)</p>
         <h3 id="stat-global-zar-total" class="text-2xl font-bold text-blue-400 mt-1">--</h3>
-        <p class="text-[11px] text-gray-400 mt-1">Landed Cost Benchmark</p>
+        <p class="text-[11px] text-gray-400 mt-1">Land Cost Benchmark</p>
       </div>
       <div class="glass-panel rounded-xl p-4">
         <p class="text-xs text-gray-400 font-medium">Active SA Retailers</p>
@@ -68,11 +67,24 @@
       </div>
     </div>
 
+    <!-- NAVIGATION TABS -->
+    <div class="flex gap-2 mb-6 border-b border-gray-800 pb-2 overflow-x-auto">
+      <button onclick="switchTab('sealed')" id="tab-sealed" class="bg-amber-500 text-gray-950 font-bold px-4 py-2 rounded-lg text-sm transition">
+        <i class="fa-solid fa-box-archive mr-2"></i>Sealed Sets
+      </button>
+      <button onclick="switchTab('singles')" id="tab-singles" class="bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold px-4 py-2 rounded-lg text-sm transition">
+        <i class="fa-solid fa-layer-group mr-2"></i>Single Cards
+      </button>
+      <button onclick="switchTab('radar')" id="tab-radar" class="bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold px-4 py-2 rounded-lg text-sm transition">
+        <i class="fa-solid fa-calendar-days mr-2"></i>Release Radar
+      </button>
+    </div>
+
     <!-- MAIN CATALOG TABLE CONTAINER -->
-    <div class="glass-panel rounded-2xl p-6">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-lg font-bold text-white">Market Comparison Catalog</h2>
-        <span class="text-xs text-gray-400" id="last-updated-text">Live Sync Active</span>
+    <div id="view-catalog" class="glass-panel rounded-2xl p-6">
+      <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
+        <input type="text" id="search-input" onkeyup="renderDashboard()" placeholder="Search products..." class="bg-gray-900 border border-gray-800 rounded-lg px-4 py-2 text-sm text-white w-full sm:w-80 focus:outline-none focus:border-amber-500">
+        <span class="text-xs text-gray-400" id="last-updated-text"><i class="fa-solid fa-circle text-emerald-500 text-[8px] mr-1"></i> Live Market Active</span>
       </div>
 
       <div class="overflow-x-auto">
@@ -89,28 +101,55 @@
             </tr>
           </thead>
           <tbody id="catalog-table-body" class="divide-y divide-gray-800/50">
-            <tr>
-              <td colspan="7" class="p-6 text-center text-gray-500">Loading catalog data...</td>
-            </tr>
           </tbody>
         </table>
+      </div>
+    </div>
+
+    <!-- RELEASE RADAR VIEW (HIDDEN BY DEFAULT) -->
+    <div id="view-radar" class="glass-panel rounded-2xl p-6 hidden">
+      <h3 class="text-lg font-bold text-white mb-4"><i class="fa-solid fa-calendar-days text-amber-500 mr-2"></i>Upcoming SA One Piece Releases</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
+          <span class="text-xs text-amber-400 font-mono font-bold">OP-10</span>
+          <h4 class="text-md font-bold text-white mt-1">Royal Blood Booster Box</h4>
+          <p class="text-xs text-gray-400 mt-1">Expected SA Release: Q1 2025</p>
+          <p class="text-xs text-emerald-400 mt-2 font-semibold">Solarpop Pre-order MSRP: ~R 3,800</p>
+        </div>
+        <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
+          <span class="text-xs text-amber-400 font-mono font-bold">EB-01</span>
+          <h4 class="text-md font-bold text-white mt-1">Extra Booster Memorial Collection</h4>
+          <p class="text-xs text-gray-400 mt-1">In Stock Across SA</p>
+          <p class="text-xs text-emerald-400 mt-2 font-semibold">SA Avg: R 2,200</p>
+        </div>
       </div>
     </div>
   </main>
 
   <script>
-    // System Global Variables
-    let usdToZarRate = 18.50;
-    const IMPORT_FACTOR = 1.15; // 15% import/customs adjustment
+    let usdToZarRate = 16.30;
+    const IMPORT_FACTOR = 1.15;
+    let currentTab = 'sealed';
 
-    let catalogData = [
-      { id: "OP01-BOX", name: "Romance Dawn Booster Box (OP-01)", set: "OP-01", globalUsd: 220.00, stores: { Solarpop: 3800, LevelUp: 3950, BigBang: 4100 } },
-      { id: "OP02-BOX", name: "Paramount War Booster Box (OP-02)", set: "OP-02", globalUsd: 145.00, stores: { Solarpop: 2800, LevelUp: 3100, BigBang: 3400 } },
-      { id: "OP05-BOX", name: "Awakening of the New Era Box (OP-05)", set: "OP-05", globalUsd: 195.00, stores: { Solarpop: 3800, LevelUp: 4200, BigBang: 4600 } },
-      { id: "OP01-120", name: "Shanks (Manga Alternate Art)", set: "OP-01", globalUsd: 1100.00, stores: { LevelUp: 23500, BigBang: 24000 } }
+    // Master Catalog Data (Sealed & Singles)
+    let masterCatalog = [
+      { id: "OP01-BOX", name: "Romance Dawn Booster Box (OP-01)", category: "sealed", set: "OP-01", globalUsd: 220.00, stores: { Solarpop: 3800, LevelUp: 3950, BigBang: 4100, Mirage: 3900 } },
+      { id: "OP02-BOX", name: "Paramount War Booster Box (OP-02)", category: "sealed", set: "OP-02", globalUsd: 145.00, stores: { Solarpop: 2800, LevelUp: 3100, BigBang: 3400, Mirage: 3000 } },
+      { id: "OP03-BOX", name: "Pillars of Strength Booster Box (OP-03)", category: "sealed", set: "OP-03", globalUsd: 125.00, stores: { Solarpop: 2400, LevelUp: 2650, BigBang: 2900 } },
+      { id: "OP04-BOX", name: "Kingdoms of Intrigue Booster Box (OP-04)", category: "sealed", set: "OP-04", globalUsd: 115.00, stores: { Solarpop: 2200, LevelUp: 2450, BigBang: 2700 } },
+      { id: "OP05-BOX", name: "Awakening of the New Era Box (OP-05)", category: "sealed", set: "OP-05", globalUsd: 195.00, stores: { Solarpop: 3800, LevelUp: 4200, BigBang: 4600 } },
+      { id: "OP06-BOX", name: "Wings of the Captain Booster Box (OP-06)", category: "sealed", set: "OP-06", globalUsd: 140.00, stores: { Solarpop: 2600, LevelUp: 2850, BigBang: 3100 } },
+      { id: "OP07-BOX", name: "500 Years Into the Future Box (OP-07)", category: "sealed", set: "OP-07", globalUsd: 130.00, stores: { Solarpop: 2500, LevelUp: 2700, BigBang: 2950 } },
+      { id: "OP08-BOX", name: "Two Legends Booster Box (OP-08)", category: "sealed", set: "OP-08", globalUsd: 125.00, stores: { Solarpop: 2400, LevelUp: 2600, BigBang: 2800 } },
+      { id: "EB01-BOX", name: "Memorial Collection Extra Booster (EB-01)", category: "sealed", set: "EB-01", globalUsd: 110.00, stores: { Solarpop: 2100, LevelUp: 2250, BigBang: 2400 } },
+      { id: "PRB01-BOX", name: "ONE PIECE CARD THE BEST (PRB-01)", category: "sealed", set: "PRB-01", globalUsd: 180.00, stores: { Solarpop: 3400, LevelUp: 3700, BigBang: 3950 } },
+      { id: "OP01-120", name: "Shanks (Manga Alternate Art)", category: "singles", set: "OP-01", globalUsd: 1100.00, stores: { LevelUp: 23500, BigBang: 24000, Mirage: 22500 } },
+      { id: "OP02-121", name: "Portgas.D.Ace (Manga Alternate Art)", category: "singles", set: "OP-02", globalUsd: 850.00, stores: { LevelUp: 17500, BigBang: 18200 } },
+      { id: "OP03-122", name: "Sabo (Manga Alternate Art)", category: "singles", set: "OP-03", globalUsd: 600.00, stores: { LevelUp: 12500, BigBang: 13000 } },
+      { id: "OP04-083", name: "Donquixote Doflamingo (SEC Alt)", category: "singles", set: "OP-04", globalUsd: 75.00, stores: { LevelUp: 1550, BigBang: 1700 } },
+      { id: "OP05-119", name: "Monkey.D.Luffy (Manga Alternate Art)", category: "singles", set: "OP-05", globalUsd: 2400.00, stores: { LevelUp: 48000, BigBang: 51000 } }
     ];
 
-    // Live Exchange Rate Fetching Function (CORS-Proxy Safe)
     async function updateLiveExchangeRate() {
       try {
         const res = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
@@ -121,37 +160,54 @@
           renderDashboard();
         }
       } catch (e) {
-        console.warn("Could not fetch live FX rate, using baseline R18.50.");
         document.getElementById('usd-zar-display').innerText = `R ${usdToZarRate.toFixed(2)}`;
       }
     }
 
-    // Auto-load automated weekly catalog.json from GitHub Actions
-    async function loadAutomatedCatalog() {
+    async function loadRemoteCatalog() {
       try {
         const res = await fetch('./catalog.json?t=' + new Date().getTime());
         if (res.ok) {
           const remoteData = await res.json();
-          if (remoteData && remoteData.length > 0) {
-            catalogData = remoteData;
-            console.log("Loaded live catalog.json");
+          if (remoteData && remoteData.length > 2) {
+            masterCatalog = remoteData;
           }
         }
-      } catch (err) {
-        console.log("Using built-in fallback catalog.");
-      }
+      } catch (e) {}
       renderDashboard();
     }
 
-    // Render Dashboard Table and Metrics
+    function switchTab(tab) {
+      currentTab = tab;
+      document.getElementById('tab-sealed').className = tab === 'sealed' ? 'bg-amber-500 text-gray-950 font-bold px-4 py-2 rounded-lg text-sm transition' : 'bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold px-4 py-2 rounded-lg text-sm transition';
+      document.getElementById('tab-singles').className = tab === 'singles' ? 'bg-amber-500 text-gray-950 font-bold px-4 py-2 rounded-lg text-sm transition' : 'bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold px-4 py-2 rounded-lg text-sm transition';
+      document.getElementById('tab-radar').className = tab === 'radar' ? 'bg-amber-500 text-gray-950 font-bold px-4 py-2 rounded-lg text-sm transition' : 'bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold px-4 py-2 rounded-lg text-sm transition';
+
+      if (tab === 'radar') {
+        document.getElementById('view-catalog').classList.add('hidden');
+        document.getElementById('view-radar').classList.remove('hidden');
+      } else {
+        document.getElementById('view-radar').classList.add('hidden');
+        document.getElementById('view-catalog').classList.remove('hidden');
+        renderDashboard();
+      }
+    }
+
     function renderDashboard() {
       const tbody = document.getElementById('catalog-table-body');
       tbody.innerHTML = '';
 
+      const query = document.getElementById('search-input').value.toLowerCase();
+      let filtered = masterCatalog.filter(item => {
+        const matchCategory = currentTab === 'sealed' ? (item.category === 'sealed' || !item.category) : item.category === 'singles';
+        const matchQuery = item.name.toLowerCase().includes(query) || item.set.toLowerCase().includes(query);
+        return matchCategory && matchQuery;
+      });
+
       let totalSaLowest = 0;
       let totalGlobalZar = 0;
 
-      catalogData.forEach(item => {
+      filtered.forEach(item => {
         const prices = Object.values(item.stores || {}).filter(p => p > 0);
         const saLowest = prices.length ? Math.min(...prices) : (item.globalUsd * usdToZarRate * IMPORT_FACTOR);
         const saHighest = prices.length ? Math.max(...prices) : (item.globalUsd * usdToZarRate * IMPORT_FACTOR);
@@ -175,20 +231,14 @@
         tbody.appendChild(tr);
       });
 
-      // Update Summary Header Stats
-      document.getElementById('stat-total-items').innerText = catalogData.length;
+      document.getElementById('stat-total-items').innerText = filtered.length;
       document.getElementById('stat-sa-lowest-total').innerText = `R ${totalSaLowest.toLocaleString('en-ZA', {maximumFractionDigits: 0})}`;
       document.getElementById('stat-global-zar-total').innerText = `R ${totalGlobalZar.toLocaleString('en-ZA', {maximumFractionDigits: 0})}`;
     }
 
-    function resetToBuiltInCatalog() {
-      loadAutomatedCatalog();
-    }
-
-    // Initialization on Page Load
     document.addEventListener('DOMContentLoaded', () => {
       updateLiveExchangeRate();
-      loadAutomatedCatalog();
+      loadRemoteCatalog();
     });
   </script>
 </body>
