@@ -1,381 +1,412 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OP TCG South Africa - Price & Portfolio Suite</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    body { background-color: #0b0f19; color: #f3f4f6; font-family: system-ui, -apple-system, sans-serif; }
-    .glass-panel { background: rgba(17, 24, 39, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
-    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>OP TCG South Africa — Trading Log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0B1D26; --panel:#12222C; --panel-2:#0F1C24; --parchment:#EDE6D6;
+    --brass:#C9A24B; --seafoam:#3E7C74; --wax:#B33F3F; --line:rgba(237,230,214,.14);
+    --muted:#9BA9AC;
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      --ink:#EDE6D6; --panel:#F7F3E9; --panel-2:#EFE8D8; --parchment:#0B1D26;
+      --line:rgba(11,29,38,.14); --muted:#5B6668;
+    }
+  }
+  :root[data-theme="dark"]{ --ink:#0B1D26; --panel:#12222C; --panel-2:#0F1C24; --parchment:#EDE6D6; --line:rgba(237,230,214,.14); --muted:#9BA9AC; }
+  *{box-sizing:border-box}
+  html{scroll-padding-top:env(safe-area-inset-top,0px)}
+  body{margin:0;background:var(--ink);color:var(--parchment);font-family:'IBM Plex Mono',monospace;min-height:100%;}
+  h1,h2,h3,.serif{font-family:'Fraunces',serif;}
+  .wrap{max-width:1100px;margin:0 auto;padding:0 20px 60px;}
+  header{border-bottom:1px solid var(--line);padding:18px 20px;position:sticky;top:0;top:env(safe-area-inset-top,0px);background:var(--ink);z-index:30;}
+  .headrow{max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;}
+  .brand{display:flex;align-items:baseline;gap:10px;}
+  .brand h1{font-size:1.3rem;margin:0;font-weight:600;letter-spacing:.02em;}
+  .brand span{font-size:.72rem;color:var(--muted);}
+  .refresh{background:none;border:1px solid var(--brass);color:var(--brass);font-family:inherit;font-size:.72rem;padding:7px 12px;cursor:pointer;letter-spacing:.03em;}
+  .refresh:hover{background:var(--brass);color:var(--ink);}
+
+  .hero{display:flex;align-items:center;gap:28px;padding:30px 0 8px;flex-wrap:wrap;}
+  .dial{width:118px;height:118px;border-radius:50%;border:1.5px solid var(--brass);position:relative;flex:0 0 auto;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 40%, var(--panel), var(--panel-2));}
+  .dial::before{content:"";position:absolute;inset:8px;border:1px solid var(--line);border-radius:50%;}
+  .dial .n{position:absolute;top:6px;left:50%;transform:translateX(-50%);font-size:.6rem;color:var(--muted);}
+  .dial .rate{font-family:'Fraunces',serif;font-size:1.3rem;font-weight:600;color:var(--brass);}
+  .dial .unit{font-size:.55rem;color:var(--muted);letter-spacing:.05em;}
+  .heroText h2{margin:0 0 6px;font-size:1.5rem;font-weight:500;}
+  .heroText p{margin:0;color:var(--muted);font-size:.82rem;max-width:48ch;line-height:1.5;}
+
+  .statline{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin:26px 0;}
+  .stat{padding:14px 18px;border-right:1px solid var(--line);}
+  .stat:last-child{border-right:none;}
+  .stat p{margin:0 0 4px;font-size:.68rem;color:var(--muted);letter-spacing:.02em;}
+  .stat h3{margin:0;font-size:1.25rem;font-family:'Fraunces',serif;font-weight:600;}
+
+  nav.tabs{display:flex;gap:2px;margin-bottom:0;overflow-x:auto;}
+  nav.tabs button{background:var(--panel-2);border:1px solid var(--line);border-bottom:none;color:var(--muted);font-family:inherit;font-size:.76rem;padding:9px 16px;cursor:pointer;white-space:nowrap;clip-path:polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%);}
+  nav.tabs button.active{background:var(--panel);color:var(--parchment);}
+  .page{background:var(--panel);border:1px solid var(--line);padding:22px;}
+
+  .toolbar{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:14px;flex-wrap:wrap;}
+  .toolbar input{background:var(--panel-2);border:1px solid var(--line);color:var(--parchment);font-family:inherit;font-size:.8rem;padding:8px 12px;width:min(280px,100%);}
+  .toolbar input:focus{outline:none;border-color:var(--brass);}
+  .live{font-size:.68rem;color:var(--seafoam);}
+  .live::before{content:"●";margin-right:5px;}
+  .addBtn{background:var(--brass);border:none;color:var(--ink);font-family:inherit;font-weight:600;font-size:.72rem;padding:8px 14px;cursor:pointer;white-space:nowrap;}
+  .addBtn:hover{opacity:.9;}
+
+  table{width:100%;border-collapse:collapse;font-size:.78rem;}
+  thead th{text-align:left;font-weight:500;color:var(--muted);font-size:.66rem;padding:8px 10px;border-bottom:1px solid var(--line);letter-spacing:.02em;}
+  tbody td{padding:11px 10px;border-bottom:1px solid var(--line);vertical-align:top;}
+  tbody tr:hover{background:var(--panel-2);}
+  .name{font-family:'Fraunces',serif;font-weight:500;font-size:.88rem;color:var(--parchment);}
+  .setTag{color:var(--brass);font-size:.68rem;border:1px solid var(--line);padding:2px 6px;}
+  .low{color:var(--seafoam);font-weight:600;}
+  .high{color:var(--wax);}
+  .shop{display:inline-flex;align-items:center;gap:3px;font-size:.62rem;color:var(--muted);border:1px solid var(--line);padding:1px 5px;margin:1px;}
+  .shop input{background:none;border:none;border-bottom:1px dotted var(--brass);color:var(--brass);font-family:inherit;font-size:.62rem;width:52px;text-align:right;}
+  .shop input:focus{outline:none;background:var(--panel-2);}
+  .hint{font-size:.66rem;color:var(--muted);margin:0 0 12px;}
+
+  .radarGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;}
+  .radarCard{border:1px solid var(--line);padding:16px;}
+  .radarCard .code{color:var(--brass);font-size:.72rem;}
+  .radarCard h4{font-family:'Fraunces',serif;margin:8px 0 4px;font-size:1rem;font-weight:500;}
+  .radarCard p{margin:2px 0;font-size:.75rem;color:var(--muted);}
+  .radarCard .price{color:var(--seafoam);font-weight:600;}
+
+  .calcGrid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+  @media (max-width:640px){.calcGrid{grid-template-columns:1fr;}}
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:.68rem;color:var(--muted);margin-bottom:5px;letter-spacing:.02em;}
+  .field input{width:100%;background:var(--panel-2);border:1px solid var(--line);color:var(--parchment);font-family:inherit;font-size:.85rem;padding:9px 10px;}
+  .field input:focus{outline:none;border-color:var(--brass);}
+  .landed{border:1px solid var(--brass);padding:18px;}
+  .landed p{margin:0 0 4px;font-size:.7rem;color:var(--muted);}
+  .landed h2{margin:0;font-size:1.9rem;color:var(--brass);font-family:'Fraunces',serif;}
+  .landed .note{border-top:1px solid var(--line);margin-top:14px;padding-top:12px;font-size:.72rem;color:var(--muted);line-height:1.5;}
+
+  .invHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:12px;flex-wrap:wrap;}
+  .undercutBox{display:flex;align-items:center;gap:8px;font-size:.7rem;color:var(--muted);}
+  .undercutBox input{width:56px;background:var(--panel-2);border:1px solid var(--line);color:var(--brass);font-family:inherit;font-size:.78rem;padding:5px 7px;text-align:right;}
+  .undercutBox input:focus{outline:none;border-color:var(--brass);}
+  .profit-pos{color:var(--seafoam);font-weight:600;}
+  .profit-neg{color:var(--wax);font-weight:600;}
+  .nodata{color:var(--muted);font-style:italic;}
+  ::-webkit-scrollbar{height:6px;width:6px;}
+  ::-webkit-scrollbar-thumb{background:var(--line);}
+</style>
 </head>
-<body class="min-h-screen custom-scrollbar pb-12">
+<body>
+<header>
+  <div class="headrow">
+    <div class="brand"><h1>OP TCG · South Africa</h1><span>Trading Log &amp; Portfolio</span></div>
+    <button class="refresh" onclick="loadRate();render();renderStock();">↻ Refresh Log</button>
+  </div>
+</header>
 
-  <!-- TOP HEADER NAV -->
-  <header class="glass-panel sticky top-0 z-40 border-b border-gray-800 px-6 py-4 mb-6">
-    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-      <div class="flex items-center gap-3">
-        <div class="bg-amber-500 text-gray-950 font-black p-2 rounded-xl text-xl tracking-wider">OP</div>
+<div class="wrap">
+  <div class="hero">
+    <div class="dial">
+      <span class="n">BEARING</span>
+      <div style="text-align:center">
+        <div class="rate" id="rateDisplay">--</div>
+        <div class="unit">ZAR / USD</div>
+      </div>
+    </div>
+    <div class="heroText">
+      <h2>Grand Line Exchange</h2>
+      <p>Live USD→ZAR bearing plus a 15% import allowance. Click any competitor price below to correct it as you check each shop — every edit is saved in this browser.</p>
+    </div>
+  </div>
+
+  <div class="statline">
+    <div class="stat"><p>Catalog items shown</p><h3 id="statItems">--</h3></div>
+    <div class="stat"><p>Lowest SA total</p><h3 id="statLow" style="color:var(--seafoam)">--</h3></div>
+    <div class="stat"><p>Global landed benchmark</p><h3 id="statGlobal" style="color:var(--brass)">--</h3></div>
+    <div class="stat"><p>Shops tracked</p><h3 id="statShops">--</h3></div>
+  </div>
+
+  <nav class="tabs">
+    <button id="t-sealed" class="active" onclick="switchTab('sealed')">Sealed</button>
+    <button id="t-singles" onclick="switchTab('singles')">Singles</button>
+    <button id="t-stock" onclick="switchTab('stock')">My Stock (Sell)</button>
+    <button id="t-radar" onclick="switchTab('radar')">Release Radar</button>
+    <button id="t-calc" onclick="switchTab('calc')">Import Calculator</button>
+  </nav>
+
+  <div class="page">
+    <div id="v-catalog">
+      <div class="toolbar">
+        <input id="search" placeholder="Search product or set…" oninput="render()">
+        <div style="display:flex;gap:10px;align-items:center">
+          <span class="live">Live market active</span>
+          <button class="addBtn" onclick="addProduct()">+ Add product</button>
+        </div>
+      </div>
+      <p class="hint">Click any price inside a shop tag to correct it. Add a store name to track a shop that isn't listed yet.</p>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr><th>Product</th><th>Set</th><th>Low</th><th>Avg</th><th>High</th><th>Shops (click to edit)</th><th>Global (USD)</th><th>Global (ZAR)</th></tr></thead>
+          <tbody id="tblBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="v-stock" style="display:none">
+      <div class="invHead">
+        <h3 class="serif" style="margin:0;font-size:1.05rem;font-weight:500">My stock — ready to sell</h3>
+        <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+          <div class="undercutBox">Undercut lowest competitor by <input type="number" id="undercutPct" value="5" oninput="onUndercutChange()">%</div>
+          <button class="addBtn" onclick="addStock()">+ Add incoming stock</button>
+        </div>
+      </div>
+      <p class="hint">Suggested price = lowest tracked competitor price, minus your undercut %. Add stock as it arrives this week; match the product name to a catalog item above for automatic pricing.</p>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr><th>Item</th><th>Qty</th><th>Cost / unit</th><th>Competitor low</th><th>Suggested price</th><th>Margin / unit</th><th>Total profit</th></tr></thead>
+          <tbody id="stockBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="v-radar" style="display:none">
+      <div class="radarGrid">
+        <div class="radarCard"><span class="code">OP-10</span><h4>Royal Blood Booster Box</h4><p>Expected SA release: Q1 2025</p><p class="price">Solarpop pre-order MSRP: ~R 3,800</p></div>
+        <div class="radarCard"><span class="code">EB-01</span><h4>Memorial Collection Extra Booster</h4><p>In stock across SA</p><p class="price">SA average: R 2,200</p></div>
+      </div>
+    </div>
+
+    <div id="v-calc" style="display:none">
+      <div class="calcGrid">
         <div>
-          <h1 class="text-xl font-bold tracking-wide text-white">OP TCG South Africa</h1>
-          <p class="text-xs text-gray-400">Marketplace, Analytics & Inventory Manager</p>
+          <div class="field"><label>Item purchase price (USD)</label><input type="number" id="c-usd" value="100" oninput="calc()"></div>
+          <div class="field"><label>Customs duty &amp; import tax (%)</label><input type="number" id="c-tax" value="15" oninput="calc()"></div>
+          <div class="field"><label>Shipping cost (ZAR)</label><input type="number" id="c-ship" value="350" oninput="calc()"></div>
         </div>
-      </div>
-
-      <div class="flex items-center gap-4">
-        <div class="bg-gray-900 border border-gray-800 px-3 py-1.5 rounded-lg flex items-center gap-2 text-xs">
-          <span class="text-gray-400"><i class="fa-solid fa-dollar-sign text-amber-500"></i> USD/ZAR Rate:</span>
-          <span id="usd-zar-display" class="font-bold text-amber-400">Fetching...</span>
-          <span class="text-[10px] text-gray-500">(+15% Import)</span>
-        </div>
-
-        <button onclick="renderDashboard()" class="bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs px-3 py-1.5 rounded-lg transition">
-          <i class="fa-solid fa-sync mr-1"></i> Refresh
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <!-- MAIN CONTAINER -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6">
-    <!-- METRIC CARDS OVERVIEW -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-      <div class="glass-panel rounded-xl p-4">
-        <p class="text-xs text-gray-400 font-medium">Total Catalog Items</p>
-        <h3 id="stat-total-items" class="text-2xl font-bold text-white mt-1">--</h3>
-        <p class="text-[11px] text-amber-500 mt-1"><i class="fa-solid fa-box mr-1"></i> Sealed & Singles</p>
-      </div>
-      <div class="glass-panel rounded-xl p-4">
-        <p class="text-xs text-gray-400 font-medium">Lowest SA Market Total</p>
-        <h3 id="stat-sa-lowest-total" class="text-2xl font-bold text-emerald-400 mt-1">--</h3>
-        <p class="text-[11px] text-gray-400 mt-1">Best Buy Prices Combined</p>
-      </div>
-      <div class="glass-panel rounded-xl p-4">
-        <p class="text-xs text-gray-400 font-medium">Global Benchmark (ZAR)</p>
-        <h3 id="stat-global-zar-total" class="text-2xl font-bold text-blue-400 mt-1">--</h3>
-        <p class="text-[11px] text-gray-400 mt-1">Landed Import Benchmark</p>
-      </div>
-      <div class="glass-panel rounded-xl p-4">
-        <p class="text-xs text-gray-400 font-medium">Active SA Shops Tracked</p>
-        <h3 class="text-2xl font-bold text-amber-400 mt-1">9 Stores</h3>
-        <p class="text-[11px] text-gray-400 mt-1">Solarpop, LevelUp, BigBang +</p>
-      </div>
-    </div>
-
-    <!-- NAVIGATION TABS -->
-    <div class="flex gap-2 mb-6 border-b border-gray-800 pb-2 overflow-x-auto">
-      <button onclick="switchTab('sealed')" id="tab-sealed" class="bg-amber-500 text-gray-950 font-bold px-4 py-2 rounded-lg text-sm transition">
-        <i class="fa-solid fa-box-archive mr-2"></i>Sealed Sets
-      </button>
-      <button onclick="switchTab('singles')" id="tab-singles" class="bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold px-4 py-2 rounded-lg text-sm transition">
-        <i class="fa-solid fa-layer-group mr-2"></i>Single Cards
-      </button>
-      <button onclick="switchTab('radar')" id="tab-radar" class="bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold px-4 py-2 rounded-lg text-sm transition">
-        <i class="fa-solid fa-calendar-days mr-2"></i>Release Radar
-      </button>
-      <button onclick="switchTab('calc')" id="tab-calc" class="bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold px-4 py-2 rounded-lg text-sm transition">
-        <i class="fa-solid fa-calculator mr-2"></i>Import Calculator
-      </button>
-      <button onclick="switchTab('inventory')" id="tab-inventory" class="bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold px-4 py-2 rounded-lg text-sm transition">
-        <i class="fa-solid fa-warehouse mr-2"></i>My Inventory
-      </button>
-    </div>
-
-    <!-- TAB 1 & 2: MAIN CATALOG TABLE CONTAINER -->
-    <div id="view-catalog" class="glass-panel rounded-2xl p-6">
-      <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
-        <input type="text" id="search-input" onkeyup="renderDashboard()" placeholder="Search products or sets..." class="bg-gray-900 border border-gray-800 rounded-lg px-4 py-2 text-sm text-white w-full sm:w-80 focus:outline-none focus:border-amber-500">
-        <span class="text-xs text-gray-400" id="last-updated-text"><i class="fa-solid fa-circle text-emerald-500 text-[8px] mr-1"></i> Live Market Active</span>
-      </div>
-
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm text-gray-300">
-          <thead class="bg-gray-900/80 text-xs text-gray-400 uppercase border-b border-gray-800">
-            <tr>
-              <th class="p-3">Product Name</th>
-              <th class="p-3">Set</th>
-              <th class="p-3 text-emerald-400">SA Lowest</th>
-              <th class="p-3">SA Average</th>
-              <th class="p-3 text-red-400">SA Highest</th>
-              <th class="p-3">Shops Listed</th>
-              <th class="p-3">Global (USD)</th>
-              <th class="p-3 text-blue-400">Global (ZAR)</th>
-            </tr>
-          </thead>
-          <tbody id="catalog-table-body" class="divide-y divide-gray-800/50">
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- TAB 3: RELEASE RADAR VIEW -->
-    <div id="view-radar" class="glass-panel rounded-2xl p-6 hidden">
-      <h3 class="text-lg font-bold text-white mb-4"><i class="fa-solid fa-calendar-days text-amber-500 mr-2"></i>Upcoming SA One Piece Releases</h3>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
-          <span class="text-xs text-amber-400 font-mono font-bold">OP-10</span>
-          <h4 class="text-md font-bold text-white mt-1">Royal Blood Booster Box</h4>
-          <p class="text-xs text-gray-400 mt-1">Expected SA Release: Q1 2025</p>
-          <p class="text-xs text-emerald-400 mt-2 font-semibold">Solarpop Pre-order MSRP: ~R 3,800</p>
-        </div>
-        <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
-          <span class="text-xs text-amber-400 font-mono font-bold">EB-01</span>
-          <h4 class="text-md font-bold text-white mt-1">Memorial Collection Extra Booster</h4>
-          <p class="text-xs text-gray-400 mt-1">In Stock Across SA</p>
-          <p class="text-xs text-emerald-400 mt-2 font-semibold">SA Avg: R 2,200</p>
+        <div class="landed">
+          <p>Total landed cost in South Africa</p>
+          <h2 id="c-result">R 0.00</h2>
+          <p style="font-size:.68rem;margin-top:6px">Using bearing <span id="c-rate">--</span> + duty &amp; freight</p>
+          <div class="note">Compare this landed total against local retail to spot arbitrage margins worth the import.</div>
         </div>
       </div>
     </div>
+  </div>
+</div>
 
-    <!-- TAB 4: IMPORT & MARGIN CALCULATOR -->
-    <div id="view-calc" class="glass-panel rounded-2xl p-6 hidden">
-      <h3 class="text-lg font-bold text-white mb-4"><i class="fa-solid fa-calculator text-amber-500 mr-2"></i>Import Landed Cost & Margin Calculator</h3>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="space-y-4">
-          <div>
-            <label class="block text-xs text-gray-400 mb-1">Item Purchase Price (USD)</label>
-            <input type="number" id="calc-usd" value="100" oninput="calculateImport()" class="w-full bg-gray-900 border border-gray-800 rounded-lg p-2.5 text-white text-sm">
-          </div>
-          <div>
-            <label class="block text-xs text-gray-400 mb-1">Customs Duty & Import Tax (%)</label>
-            <input type="number" id="calc-tax" value="15" oninput="calculateImport()" class="w-full bg-gray-900 border border-gray-800 rounded-lg p-2.5 text-white text-sm">
-          </div>
-          <div>
-            <label class="block text-xs text-gray-400 mb-1">Shipping Cost (ZAR)</label>
-            <input type="number" id="calc-shipping" value="350" oninput="calculateImport()" class="w-full bg-gray-900 border border-gray-800 rounded-lg p-2.5 text-white text-sm">
-          </div>
-        </div>
+<script>
+let rate = 16.30;
+const IMPORT_FACTOR = 1.15;
+let tab = 'sealed';
+let undercutPct = parseFloat(localStorage.getItem('optcg_undercut')) || 5;
 
-        <div class="bg-gray-900/80 p-5 rounded-xl border border-gray-800 flex flex-col justify-between">
-          <div>
-            <p class="text-xs text-gray-400">Total Landed Cost in South Africa</p>
-            <h2 id="calc-result" class="text-3xl font-black text-amber-400 mt-1">R 0.00</h2>
-            <p class="text-xs text-gray-500 mt-2">Calculated using live Exchange Rate (<span id="calc-rate-ref">--</span>) + Selected Duty & Freight.</p>
-          </div>
-          <div class="pt-4 border-t border-gray-800">
-            <p class="text-xs text-emerald-400 font-semibold"><i class="fa-solid fa-shield-halved mr-1"></i> Strategy Note:</p>
-            <p class="text-xs text-gray-400 mt-1">Compare this landed total against local retail (Solarpop / LevelUp / BigBang) to find arbitrage margins.</p>
-          </div>
-        </div>
-      </div>
-    </div>
+const RAW = [
+  {id:"OP01-BOX",name:"Romance Dawn Booster Box (OP-01)",set:"OP-01",category:"sealed",globalUsd:210.00,stores:{Solarpop:3800,"Level Up Store":3950,"The Big Bang Store":4100,"Mirage Gaming":3900,"Unplugged Games":3999,"Underworld Connections":4050,"Sad Robot":4150,"Dracarys Gaming":3950,"Top Deck":4000}},
+  {id:"OP02-BOX",name:"Paramount War Booster Box (OP-02)",set:"OP-02",category:"sealed",globalUsd:145.00,stores:{Solarpop:2800,LevelUp:3100,BigBang:3400,Mirage:3000}},
+  {id:"OP03-BOX",name:"Pillars of Strength Booster Box (OP-03)",set:"OP-03",category:"sealed",globalUsd:125.00,stores:{Solarpop:2400,LevelUp:2650,BigBang:2900}},
+  {id:"OP04-BOX",name:"Kingdoms of Intrigue Booster Box (OP-04)",set:"OP-04",category:"sealed",globalUsd:115.00,stores:{Solarpop:2200,LevelUp:2450,BigBang:2700}},
+  {id:"OP05-BOX",name:"Awakening of the New Era Box (OP-05)",set:"OP-05",category:"sealed",globalUsd:195.00,stores:{Solarpop:3800,LevelUp:4200,BigBang:4600}},
+  {id:"OP06-BOX",name:"Wings of the Captain Booster Box (OP-06)",set:"OP-06",category:"sealed",globalUsd:140.00,stores:{Solarpop:2600,LevelUp:2850,BigBang:3100}},
+  {id:"OP07-BOX",name:"500 Years Into the Future Box (OP-07)",set:"OP-07",category:"sealed",globalUsd:130.00,stores:{Solarpop:2500,LevelUp:2700,BigBang:2950}},
+  {id:"OP08-BOX",name:"Two Legends Booster Box (OP-08)",set:"OP-08",category:"sealed",globalUsd:125.00,stores:{Solarpop:2400,LevelUp:2600,BigBang:2800}},
+  {id:"EB01-BOX",name:"Memorial Collection Extra Booster (EB-01)",set:"EB-01",category:"sealed",globalUsd:110.00,stores:{Solarpop:2100,LevelUp:2250,BigBang:2400}},
+  {id:"PRB01-BOX",name:"ONE PIECE CARD THE BEST (PRB-01)",set:"PRB-01",category:"sealed",globalUsd:180.00,stores:{Solarpop:3400,LevelUp:3700,BigBang:3950}},
+  {id:"OP01-120",name:"Shanks (Manga Alternate Art)",set:"OP-01",category:"singles",globalUsd:1100.00,stores:{Solarpop:0,"Level Up Store":23500,"The Big Bang Store":24000,"Mirage Gaming":22500,"Unplugged Games":23000,"Underworld Connections":23800,"Sad Robot":24500,"Dracarys Gaming":23200,"Top Deck":23000}},
+  {id:"OP02-121",name:"Portgas.D.Ace (Manga Alternate Art)",set:"OP-02",category:"singles",globalUsd:850.00,stores:{LevelUp:17500,BigBang:18200}},
+  {id:"OP03-122",name:"Sabo (Manga Alternate Art)",set:"OP-03",category:"singles",globalUsd:600.00,stores:{LevelUp:12500,BigBang:13000}},
+  {id:"OP04-083",name:"Donquixote Doflamingo (SEC Alt)",set:"OP-04",category:"singles",globalUsd:75.00,stores:{LevelUp:1550,BigBang:1700}},
+  {id:"OP05-119",name:"Monkey.D.Luffy (Manga Alternate Art)",set:"OP-05",category:"singles",globalUsd:2400.00,stores:{LevelUp:48000,BigBang:51000}}
+];
 
-    <!-- TAB 5: PERSONAL INVENTORY / PORTFOLIO -->
-    <div id="view-inventory" class="glass-panel rounded-2xl p-6 hidden">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-warehouse text-amber-500 mr-2"></i>My Collection & Investment Portfolio</h3>
-        <button onclick="addInventoryItem()" class="bg-amber-500 text-gray-950 font-bold px-3 py-1.5 rounded-lg text-xs hover:bg-amber-400 transition">+ Add Item</button>
-      </div>
+function normalize(items){
+  return items.map(it=>{
+    let category = it.category;
+    if(!category && it.type){ category = /single/i.test(it.type) ? 'singles' : 'sealed'; }
+    return {...it, category: category || 'sealed', stores: it.stores || {}};
+  });
+}
 
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm text-gray-300">
-          <thead class="bg-gray-900/80 text-xs text-gray-400 uppercase border-b border-gray-800">
-            <tr>
-              <th class="p-3">Item</th>
-              <th class="p-3">Qty</th>
-              <th class="p-3">Buy Price (ZAR)</th>
-              <th class="p-3 text-emerald-400">Current SA Value</th>
-              <th class="p-3">Profit/Loss</th>
-            </tr>
-          </thead>
-          <tbody id="inventory-table-body" class="divide-y divide-gray-800/50">
-            <!-- Rendered by JS -->
-          </tbody>
-        </table>
-      </div>
-    </div>
+function loadJSON(key, fallback){
+  try{ const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }catch(e){ return fallback; }
+}
+function saveJSON(key, val){ try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){} }
 
-  </main>
+let catalog = loadJSON('optcg_catalog', null) || normalize(RAW);
+let myStock = loadJSON('optcg_stock', null) || [
+  {name:"Romance Dawn Booster Box (OP-01)", qty:6, cost:3200},
+  {name:"Shanks (Manga Alternate Art)", qty:1, cost:19500}
+];
 
-  <script>
-    let usdToZarRate = 16.30;
-    const IMPORT_FACTOR = 1.15;
-    let currentTab = 'sealed';
+function saveCatalog(){ saveJSON('optcg_catalog', catalog); }
+function saveStock(){ saveJSON('optcg_stock', myStock); }
 
-    let myInventory = [
-      { name: "Romance Dawn Booster Box (OP-01)", qty: 2, buyPrice: 3500 },
-      { name: "Shanks (Manga Alternate Art)", qty: 1, buyPrice: 20000 }
-    ];
+async function loadRate(){
+  try{
+    const r = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+    const d = await r.json();
+    if(d && d.rates && d.rates.ZAR){ rate = d.rates.ZAR; }
+  }catch(e){}
+  document.getElementById('rateDisplay').innerText = rate.toFixed(2);
+  calc();
+}
 
-    let masterCatalog = [
-      { id: "OP01-BOX", name: "Romance Dawn Booster Box (OP-01)", category: "sealed", set: "OP-01", globalUsd: 220.00, stores: { Solarpop: 3800, LevelUp: 3950, BigBang: 4100, Mirage: 3900 } },
-      { id: "OP02-BOX", name: "Paramount War Booster Box (OP-02)", category: "sealed", set: "OP-02", globalUsd: 145.00, stores: { Solarpop: 2800, LevelUp: 3100, BigBang: 3400, Mirage: 3000 } },
-      { id: "OP03-BOX", name: "Pillars of Strength Booster Box (OP-03)", category: "sealed", set: "OP-03", globalUsd: 125.00, stores: { Solarpop: 2400, LevelUp: 2650, BigBang: 2900 } },
-      { id: "OP04-BOX", name: "Kingdoms of Intrigue Booster Box (OP-04)", category: "sealed", set: "OP-04", globalUsd: 115.00, stores: { Solarpop: 2200, LevelUp: 2450, BigBang: 2700 } },
-      { id: "OP05-BOX", name: "Awakening of the New Era Box (OP-05)", category: "sealed", set: "OP-05", globalUsd: 195.00, stores: { Solarpop: 3800, LevelUp: 4200, BigBang: 4600 } },
-      { id: "OP06-BOX", name: "Wings of the Captain Booster Box (OP-06)", category: "sealed", set: "OP-06", globalUsd: 140.00, stores: { Solarpop: 2600, LevelUp: 2850, BigBang: 3100 } },
-      { id: "OP07-BOX", name: "500 Years Into the Future Box (OP-07)", category: "sealed", set: "OP-07", globalUsd: 130.00, stores: { Solarpop: 2500, LevelUp: 2700, BigBang: 2950 } },
-      { id: "OP08-BOX", name: "Two Legends Booster Box (OP-08)", category: "sealed", set: "OP-08", globalUsd: 125.00, stores: { Solarpop: 2400, LevelUp: 2600, BigBang: 2800 } },
-      { id: "EB01-BOX", name: "Memorial Collection Extra Booster (EB-01)", category: "sealed", set: "EB-01", globalUsd: 110.00, stores: { Solarpop: 2100, LevelUp: 2250, BigBang: 2400 } },
-      { id: "PRB01-BOX", name: "ONE PIECE CARD THE BEST (PRB-01)", category: "sealed", set: "PRB-01", globalUsd: 180.00, stores: { Solarpop: 3400, LevelUp: 3700, BigBang: 3950 } },
-      { id: "OP01-120", name: "Shanks (Manga Alternate Art)", category: "singles", set: "OP-01", globalUsd: 1100.00, stores: { LevelUp: 23500, BigBang: 24000, Mirage: 22500 } },
-      { id: "OP02-121", name: "Portgas.D.Ace (Manga Alternate Art)", category: "singles", set: "OP-02", globalUsd: 850.00, stores: { LevelUp: 17500, BigBang: 18200 } },
-      { id: "OP03-122", name: "Sabo (Manga Alternate Art)", category: "singles", set: "OP-03", globalUsd: 600.00, stores: { LevelUp: 12500, BigBang: 13000 } },
-      { id: "OP04-083", name: "Donquixote Doflamingo (SEC Alt)", category: "singles", set: "OP-04", globalUsd: 75.00, stores: { LevelUp: 1550, BigBang: 1700 } },
-      { id: "OP05-119", name: "Monkey.D.Luffy (Manga Alternate Art)", category: "singles", set: "OP-05", globalUsd: 2400.00, stores: { LevelUp: 48000, BigBang: 51000 } }
-    ];
-
-    async function updateLiveExchangeRate() {
-      try {
-        const res = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
-        const data = await res.json();
-        if (data && data.rates && data.rates.ZAR) {
-          usdToZarRate = data.rates.ZAR;
-          document.getElementById('usd-zar-display').innerText = `R ${usdToZarRate.toFixed(2)}`;
-          calculateImport();
-          renderDashboard();
-        }
-      } catch (e) {
-        document.getElementById('usd-zar-display').innerText = `R ${usdToZarRate.toFixed(2)}`;
-      }
+async function loadRemoteCatalog(){
+  if(loadJSON('optcg_catalog', null)) return; // local edits win — don't clobber them
+  try{
+    const r = await fetch('./catalog.json?t=' + Date.now());
+    if(r.ok){
+      const remote = await r.json();
+      if(Array.isArray(remote) && remote.length > 0){ catalog = normalize(remote); render(); }
     }
+  }catch(e){}
+}
 
-    async function loadRemoteCatalog() {
-      try {
-        const res = await fetch('./catalog.json?t=' + new Date().getTime());
-        if (res.ok) {
-          const remoteData = await res.json();
-          if (remoteData && remoteData.length > 2) {
-            masterCatalog = remoteData;
-          }
-        }
-      } catch (e) {}
-      renderDashboard();
-    }
+function switchTab(t){
+  tab = t;
+  ['sealed','singles','stock','radar','calc'].forEach(x=>{
+    document.getElementById('t-'+x)?.classList.toggle('active', x===t);
+  });
+  document.getElementById('v-catalog').style.display = (t==='sealed'||t==='singles') ? 'block':'none';
+  document.getElementById('v-stock').style.display = t==='stock' ? 'block':'none';
+  document.getElementById('v-radar').style.display = t==='radar' ? 'block':'none';
+  document.getElementById('v-calc').style.display = t==='calc' ? 'block':'none';
+  if(t==='sealed'||t==='singles') render();
+  if(t==='calc') calc();
+  if(t==='stock') renderStock();
+}
 
-    function switchTab(tab) {
-      currentTab = tab;
-      const tabs = ['sealed', 'singles', 'radar', 'calc', 'inventory'];
-      tabs.forEach(t => {
-        const btn = document.getElementById(`tab-${t}`);
-        if (btn) {
-          btn.className = t === tab ? 'bg-amber-500 text-gray-950 font-bold px-4 py-2 rounded-lg text-sm transition' : 'bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold px-4 py-2 rounded-lg text-sm transition';
-        }
-      });
+function money(n){ if(n==null || isNaN(n)) return '—'; return 'R ' + n.toLocaleString('en-ZA',{maximumFractionDigits:0}); }
 
-      document.getElementById('view-catalog').classList.add('hidden');
-      document.getElementById('view-radar').classList.add('hidden');
-      document.getElementById('view-calc').classList.add('hidden');
-      document.getElementById('view-inventory').classList.add('hidden');
+function competitorStats(it){
+  const prices = Object.values(it.stores||{}).filter(p=>p>0);
+  const low = prices.length ? Math.min(...prices) : it.globalUsd*rate*IMPORT_FACTOR;
+  const high = prices.length ? Math.max(...prices) : low;
+  const avg = prices.length ? prices.reduce((a,b)=>a+b,0)/prices.length : low;
+  return {low, high, avg, hasData: prices.length>0};
+}
 
-      if (tab === 'sealed' || tab === 'singles') {
-        document.getElementById('view-catalog').classList.remove('hidden');
-        renderDashboard();
-      } else if (tab === 'radar') {
-        document.getElementById('view-radar').classList.remove('hidden');
-      } else if (tab === 'calc') {
-        document.getElementById('view-calc').classList.remove('hidden');
-        calculateImport();
-      } else if (tab === 'inventory') {
-        document.getElementById('view-inventory').classList.remove('hidden');
-        renderInventory();
-      }
-    }
+function render(){
+  const q = (document.getElementById('search').value || '').toLowerCase();
+  const filtered = catalog.filter(it=>{
+    const matchCat = tab==='singles' ? it.category==='singles' : it.category==='sealed';
+    const matchQ = it.name.toLowerCase().includes(q) || it.set.toLowerCase().includes(q);
+    return matchCat && matchQ;
+  });
 
-    function calculateImport() {
-      const usd = parseFloat(document.getElementById('calc-usd').value) || 0;
-      const taxPercent = parseFloat(document.getElementById('calc-tax').value) || 0;
-      const shipping = parseFloat(document.getElementById('calc-shipping').value) || 0;
+  let totalLow=0, totalGlobal=0;
+  const allShops = new Set();
+  catalog.forEach(it=>Object.keys(it.stores||{}).forEach(s=>allShops.add(s)));
 
-      const baseZar = usd * usdToZarRate;
-      const totalLanded = (baseZar * (1 + (taxPercent / 100))) + shipping;
+  const tbody = document.getElementById('tblBody');
+  tbody.innerHTML = filtered.map((it, idx)=>{
+    const {low, high, avg} = competitorStats(it);
+    const globalZar = it.globalUsd*rate*IMPORT_FACTOR;
+    totalLow += low; totalGlobal += globalZar;
+    const realIdx = catalog.indexOf(it);
+    const shops = Object.entries(it.stores||{})
+      .map(([s,p])=>`<span class="shop">${s}: R<input type="number" value="${p}" onblur="editPrice(${realIdx},'${s.replace(/'/g,"\\'")}',this.value)"></span>`).join('')
+      || '<span class="nodata">no prices yet</span>';
+    return `<tr>
+      <td class="name">${it.name}</td>
+      <td><span class="setTag">${it.set}</span></td>
+      <td class="low">${money(low)}</td>
+      <td>${money(avg)}</td>
+      <td class="high">${money(high)}</td>
+      <td>${shops}</td>
+      <td>$${it.globalUsd.toFixed(2)}</td>
+      <td style="color:var(--brass)">${money(globalZar)}</td>
+    </tr>`;
+  }).join('');
 
-      document.getElementById('calc-rate-ref').innerText = `R ${usdToZarRate.toFixed(2)}/USD`;
-      document.getElementById('calc-result').innerText = `R ${totalLanded.toLocaleString('en-ZA', {maximumFractionDigits: 2})}`;
-    }
+  document.getElementById('statItems').innerText = filtered.length;
+  document.getElementById('statLow').innerText = money(totalLow);
+  document.getElementById('statGlobal').innerText = money(totalGlobal);
+  document.getElementById('statShops').innerText = allShops.size;
+}
 
-    function renderInventory() {
-      const tbody = document.getElementById('inventory-table-body');
-      tbody.innerHTML = '';
-      myInventory.forEach(item => {
-        const matched = masterCatalog.find(c => c.name === item.name);
-        let currentVal = item.buyPrice;
-        if (matched) {
-          const prices = Object.values(matched.stores || {}).filter(p => p > 0);
-          if (prices.length) currentVal = Math.min(...prices);
-        }
+function editPrice(idx, store, value){
+  const n = parseFloat(value);
+  if(!catalog[idx].stores) catalog[idx].stores = {};
+  catalog[idx].stores[store] = isNaN(n) ? 0 : n;
+  saveCatalog();
+  render();
+  if(tab==='stock') renderStock();
+}
 
-        const profit = (currentVal - item.buyPrice) * item.qty;
-        const profitClass = profit >= 0 ? 'text-emerald-400' : 'text-red-400';
+function addProduct(){
+  const name = prompt('Product name:');
+  if(!name) return;
+  const set = prompt('Set code (e.g. OP-11):', 'OP-11') || '—';
+  const category = tab==='singles' ? 'singles' : 'sealed';
+  const globalUsd = parseFloat(prompt('Reference global price (USD):', '100')) || 0;
+  const id = name.slice(0,10).toUpperCase().replace(/[^A-Z0-9]/g,'') + '-' + Date.now().toString().slice(-4);
+  catalog.push({id, name, set, category, globalUsd, stores:{}});
+  saveCatalog();
+  render();
+}
 
-        const tr = document.createElement('tr');
-        tr.className = "hover:bg-gray-800/30 transition";
-        tr.innerHTML = `
-          <td class="p-3 font-semibold text-white">${item.name}</td>
-          <td class="p-3">${item.qty}</td>
-          <td class="p-3">R ${item.buyPrice.toLocaleString('en-ZA')}</td>
-          <td class="p-3 text-emerald-400 font-bold">R ${currentVal.toLocaleString('en-ZA')}</td>
-          <td class="p-3 font-bold ${profitClass}">R ${profit >= 0 ? '+' : ''}${profit.toLocaleString('en-ZA')}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
+function calc(){
+  const usd = parseFloat(document.getElementById('c-usd').value)||0;
+  const taxPct = parseFloat(document.getElementById('c-tax').value)||0;
+  const ship = parseFloat(document.getElementById('c-ship').value)||0;
+  const base = usd*rate;
+  const landed = base*(1+taxPct/100)+ship;
+  document.getElementById('c-rate').innerText = 'R ' + rate.toFixed(2) + '/USD';
+  document.getElementById('c-result').innerText = 'R ' + landed.toLocaleString('en-ZA',{maximumFractionDigits:2});
+}
 
-    function addInventoryItem() {
-      const name = prompt("Enter item name (e.g., OP-05 Booster Box):");
-      if (!name) return;
-      const qty = parseInt(prompt("Enter quantity:", "1")) || 1;
-      const buyPrice = parseFloat(prompt("Enter buy price per unit (ZAR):", "2500")) || 0;
-      myInventory.push({ name, qty, buyPrice });
-      renderInventory();
-    }
+function onUndercutChange(){
+  undercutPct = parseFloat(document.getElementById('undercutPct').value) || 0;
+  saveJSON('optcg_undercut', undercutPct);
+  renderStock();
+}
 
-    function renderDashboard() {
-      const tbody = document.getElementById('catalog-table-body');
-      tbody.innerHTML = '';
+function renderStock(){
+  document.getElementById('undercutPct').value = undercutPct;
+  const tbody = document.getElementById('stockBody');
+  tbody.innerHTML = myStock.map((item, idx)=>{
+    const match = catalog.find(c=>c.name.toLowerCase()===item.name.toLowerCase() || c.name.toLowerCase().includes(item.name.toLowerCase()));
+    let competitorLow = null;
+    if(match){ competitorLow = competitorStats(match).low; }
+    const suggested = competitorLow!=null ? competitorLow * (1 - undercutPct/100) : null;
+    const margin = suggested!=null ? suggested - item.cost : null;
+    const totalProfit = margin!=null ? margin * item.qty : null;
+    const cls = margin!=null ? (margin>=0?'profit-pos':'profit-neg') : 'nodata';
+    return `<tr>
+      <td class="name">${item.name}</td>
+      <td>${item.qty}</td>
+      <td>${money(item.cost)}</td>
+      <td>${competitorLow!=null ? money(competitorLow) : '<span class="nodata">not matched</span>'}</td>
+      <td class="low">${suggested!=null ? money(suggested) : '—'}</td>
+      <td class="${cls}">${margin!=null ? (margin>=0?'+':'')+money(margin) : '—'}</td>
+      <td class="${cls}">${totalProfit!=null ? (totalProfit>=0?'+':'')+money(totalProfit) : '—'}</td>
+    </tr>`;
+  }).join('');
+}
 
-      const query = document.getElementById('search-input').value.toLowerCase();
-      let filtered = masterCatalog.filter(item => {
-        const matchCategory = currentTab === 'sealed' ? (item.category === 'sealed' || !item.category) : item.category === 'singles';
-        const matchQuery = item.name.toLowerCase().includes(query) || item.set.toLowerCase().includes(query);
-        return matchCategory && matchQuery;
-      });
+function addStock(){
+  const name = prompt('Product name (match your catalog name for auto-pricing):');
+  if(!name) return;
+  const qty = parseInt(prompt('Quantity arriving:', '1'))||1;
+  const cost = parseFloat(prompt('Your cost per unit (ZAR):', '0'))||0;
+  myStock.push({name, qty, cost});
+  saveStock();
+  renderStock();
+}
 
-      let totalSaLowest = 0;
-      let totalGlobalZar = 0;
-
-      filtered.forEach(item => {
-        const storeEntries = Object.entries(item.stores || {});
-        const prices = storeEntries.map(e => e[1]).filter(p => p > 0);
-        const saLowest = prices.length ? Math.min(...prices) : (item.globalUsd * usdToZarRate * IMPORT_FACTOR);
-        const saHighest = prices.length ? Math.max(...prices) : (item.globalUsd * usdToZarRate * IMPORT_FACTOR);
-        const saAvg = prices.length ? (prices.reduce((a,b)=>a+b,0)/prices.length) : saLowest;
-        const globalZar = item.globalUsd * usdToZarRate * IMPORT_FACTOR;
-
-        totalSaLowest += saLowest;
-        totalGlobalZar += globalZar;
-
-        const shopListings = storeEntries.map(([store, price]) => `<span class="bg-gray-800 px-1.5 py-0.5 rounded text-[11px] mr-1 text-gray-300">${store}: R${price}</span>`).join('');
-
-        const tr = document.createElement('tr');
-        tr.className = "hover:bg-gray-800/30 transition";
-        tr.innerHTML = `
-          <td class="p-3 font-semibold text-white">${item.name}</td>
-          <td class="p-3 text-xs"><span class="bg-gray-800 px-2 py-0.5 rounded text-amber-400 font-mono">${item.set}</span></td>
-          <td class="p-3 font-bold text-emerald-400">R ${saLowest.toLocaleString('en-ZA', {maximumFractionDigits: 0})}</td>
-          <td class="p-3 text-gray-300">R ${saAvg.toLocaleString('en-ZA', {maximumFractionDigits: 0})}</td>
-          <td class="p-3 text-red-400">R ${saHighest.toLocaleString('en-ZA', {maximumFractionDigits: 0})}</td>
-          <td class="p-3">${shopListings || '<span class="text-xs text-gray-500">N/A</span>'}</td>
-          <td class="p-3 text-gray-400">$${item.globalUsd.toFixed(2)}</td>
-          <td class="p-3 text-blue-400 font-semibold">R ${globalZar.toLocaleString('en-ZA', {maximumFractionDigits: 2})}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-
-      document.getElementById('stat-total-items').innerText = filtered.length;
-      document.getElementById('stat-sa-lowest-total').innerText = `R ${totalSaLowest.toLocaleString('en-ZA', {maximumFractionDigits: 0})}`;
-      document.getElementById('stat-global-zar-total').innerText = `R ${totalGlobalZar.toLocaleString('en-ZA', {maximumFractionDigits: 0})}`;
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      updateLiveExchangeRate();
-      loadRemoteCatalog();
-    });
-  </script>
+loadRate();
+loadRemoteCatalog();
+render();
+renderStock();
+</script>
 </body>
 </html>
