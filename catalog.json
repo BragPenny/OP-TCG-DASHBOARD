@@ -361,9 +361,7 @@
     "set": "Unknown",
     "category": "singles",
     "globalUsd": 0,
-    "stores": {
-      "Level Up Store": 330.0
-    }
+    "stores": {}
   },
   {
     "id": "FUNKO-POP-ONE-PIECE-MONKEY-D-GARP-GARP-G",
@@ -681,7 +679,9 @@
     "set": "Unknown",
     "category": "singles",
     "globalUsd": 0,
-    "stores": {}
+    "stores": {
+      "Level Up Store": 1130.0
+    }
   },
   {
     "id": "ONE-PIECE-CARD-GAME-CARRYING-ON-HIS-WILL",
