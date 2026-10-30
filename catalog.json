@@ -663,7 +663,9 @@
     "set": "OP-14",
     "category": "sealed",
     "globalUsd": 0,
-    "stores": {}
+    "stores": {
+      "Level Up Store": 2599.0
+    }
   },
   {
     "id": "FUNKO-POP-ONE-PIECE-LUFFY-GEAR-FIVE-CHAS",
