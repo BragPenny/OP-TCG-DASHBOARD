@@ -1,5 +1,45 @@
 [
   {
+    "id": "PANINI-ONE-PIECE-TRADING-CARDS-MEGA-STAR",
+    "name": "Panini | One Piece Trading Cards | Mega Starter Pack",
+    "set": "Unknown",
+    "category": "singles",
+    "globalUsd": 0,
+    "stores": {
+      "Level Up Store": 250.0
+    }
+  },
+  {
+    "id": "PANINI-ONE-PIECE-TRADING-CARDS-BOOSTER-B",
+    "name": "Panini | One Piece Trading Cards | Booster Box",
+    "set": "Unknown",
+    "category": "sealed",
+    "globalUsd": 0,
+    "stores": {
+      "Level Up Store": 1149.0
+    }
+  },
+  {
+    "id": "PANINI-ONE-PIECE-TRADING-CARDS-BOOSTER-P",
+    "name": "Panini | One Piece Trading Cards | Booster Pack",
+    "set": "Unknown",
+    "category": "sealed",
+    "globalUsd": 0,
+    "stores": {
+      "Level Up Store": 65.0
+    }
+  },
+  {
+    "id": "PANINI-ONE-PIECE-TRADING-CARDS-ECO-PACK",
+    "name": "Panini | One Piece Trading Cards | Eco Pack",
+    "set": "Unknown",
+    "category": "singles",
+    "globalUsd": 0,
+    "stores": {
+      "Level Up Store": 195.0
+    }
+  },
+  {
     "id": "ONE-PIECE-CARD-GAME-THE-WORLD-S-STRONGES",
     "name": "One Piece Card Game: The World's Strongest Warriors (Op-17) | Booster Pack",
     "set": "OP-17",
@@ -1434,6 +1474,26 @@
     "stores": {}
   },
   {
+    "id": "ONE-PIECE-SEASON-2-MINI-FIGURES-BLIND-BO",
+    "name": "One Piece Season 2 Mini Figures Blind Box",
+    "set": "Unknown",
+    "category": "singles",
+    "globalUsd": 0,
+    "stores": {
+      "The Big Bang Shop": 129.0
+    }
+  },
+  {
+    "id": "ONE-PIECE-CARD-GAME-THE-BIG-BANG-INFINIT",
+    "name": "One Piece Card Game - The Big Bang Infinity Convention 2026 TCG Tournament",
+    "set": "Unknown",
+    "category": "singles",
+    "globalUsd": 0,
+    "stores": {
+      "The Big Bang Shop": 300.0
+    }
+  },
+  {
     "id": "MONKEY-D-LUFFY-OP18-4TH-ANNIVERSARY-WINN",
     "name": "Monkey.D.Luffy (OP18 4th Anniversary) (Winner) (P-161) - One Piece Promotion Cards Foil",
     "set": "OP-18",
@@ -2246,16 +2306,6 @@
     "category": "singles",
     "globalUsd": 0,
     "stores": {}
-  },
-  {
-    "id": "ONE-PIECE-HEROINES-SPECIAL-SET-COLLECTIO",
-    "name": "One Piece: Heroines Special Set Collection",
-    "set": "Unknown",
-    "category": "singles",
-    "globalUsd": 0,
-    "stores": {
-      "The Big Bang Shop": 4999.0
-    }
   },
   {
     "id": "DON-CARD-ALTERNATE-ART-EXTRA-BOOSTER-ONE",
