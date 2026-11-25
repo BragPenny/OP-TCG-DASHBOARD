@@ -769,9 +769,7 @@
     "set": "Unknown",
     "category": "singles",
     "globalUsd": 0,
-    "stores": {
-      "Level Up Store": 1130.0
-    }
+    "stores": {}
   },
   {
     "id": "ONE-PIECE-CARD-GAME-CARRYING-ON-HIS-WILL",
@@ -1693,7 +1691,9 @@
     "set": "EB-05",
     "category": "singles",
     "globalUsd": 0,
-    "stores": {}
+    "stores": {
+      "The Big Bang Shop": 10.0
+    }
   },
   {
     "id": "BUGGY-CS-26-27-EVENT-PACK-FINALIST-VER-P",
@@ -1869,7 +1869,9 @@
     "set": "EB-05",
     "category": "singles",
     "globalUsd": 0,
-    "stores": {}
+    "stores": {
+      "The Big Bang Shop": 10.0
+    }
   },
   {
     "id": "BABY-5-CS-26-27-CELEBRATION-PACK-OP12-11",
@@ -2253,7 +2255,9 @@
     "set": "EB-05",
     "category": "singles",
     "globalUsd": 0,
-    "stores": {}
+    "stores": {
+      "The Big Bang Shop": 345.0
+    }
   },
   {
     "id": "REBECCA-OP15-039-HEROINE-LEADER-OP15-039",
@@ -2441,7 +2445,9 @@
     "set": "Unknown",
     "category": "singles",
     "globalUsd": 0,
-    "stores": {}
+    "stores": {
+      "The Big Bang Shop": 30.0
+    }
   },
   {
     "id": "NAMI-OP11-041-ALTERNATE-ART-OP11-041-EXT",
@@ -2957,7 +2963,9 @@
     "set": "EB-05",
     "category": "singles",
     "globalUsd": 0,
-    "stores": {}
+    "stores": {
+      "The Big Bang Shop": 10.0
+    }
   },
   {
     "id": "SPECIAL-HOLLOW-EB05-049-EXTRA-BOOSTER-ON",
@@ -2973,7 +2981,9 @@
     "set": "EB-05",
     "category": "singles",
     "globalUsd": 0,
-    "stores": {}
+    "stores": {
+      "The Big Bang Shop": 10.0
+    }
   },
   {
     "id": "NICO-ROBIN-010-ALTERNATE-ART-EB05-010-EX",
@@ -3125,7 +3135,9 @@
     "set": "EB-05",
     "category": "singles",
     "globalUsd": 0,
-    "stores": {}
+    "stores": {
+      "The Big Bang Shop": 10.0
+    }
   },
   {
     "id": "PERONA-EXTRA-GRAND-BATTLE-FOR-STORES-FAL",
@@ -3173,7 +3185,9 @@
     "set": "EB-05",
     "category": "sealed",
     "globalUsd": 0,
-    "stores": {}
+    "stores": {
+      "The Big Bang Shop": 10.0
+    }
   },
   {
     "id": "LUCY-FLAME-FLAME-FRUIT-COLISEUM-OP15-002",
@@ -3253,7 +3267,9 @@
     "set": "EB-05",
     "category": "singles",
     "globalUsd": 0,
-    "stores": {}
+    "stores": {
+      "The Big Bang Shop": 10.0
+    }
   },
   {
     "id": "BOA-HANCOCK-EB05-028-EXTRA-BOOSTER-ONE-P",
@@ -3285,7 +3301,9 @@
     "set": "EB-05",
     "category": "singles",
     "globalUsd": 0,
-    "stores": {}
+    "stores": {
+      "The Big Bang Shop": 10.0
+    }
   },
   {
     "id": "DON-CARD-OFFICIAL-9-POCKET-BINDER-VOL-1-",
@@ -3491,7 +3509,9 @@
     "set": "EB-05",
     "category": "singles",
     "globalUsd": 0,
-    "stores": {}
+    "stores": {
+      "The Big Bang Shop": 10.0
+    }
   },
   {
     "id": "ONE-PIECE-STRAW-HAT-SHOWDOWN-MINI-FIGURE",
