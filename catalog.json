@@ -1520,6 +1520,14 @@
     "stores": {}
   },
   {
+    "id": "KOALA-GIFT-COLLECTION-ONE-PIECE-HEROINES",
+    "name": "Koala (Gift Collection -ONE PIECE Heroines- Set) (EB03-042) - One Piece Promotion Cards Foil",
+    "set": "EB-03",
+    "category": "singles",
+    "globalUsd": 0,
+    "stores": {}
+  },
+  {
     "id": "VINSMOKE-REIJU-GIFT-COLLECTION-ONE-PIECE",
     "name": "Vinsmoke Reiju (Gift Collection -ONE PIECE Heroines- Set) (OP12-063) - One Piece Promotion Cards Foil",
     "set": "OP-12",
@@ -2496,7 +2504,7 @@
     "category": "sealed",
     "globalUsd": 0,
     "stores": {
-      "The Big Bang Shop": 6999.0
+      "The Big Bang Shop": 5999.0
     }
   },
   {
